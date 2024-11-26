@@ -133,14 +133,13 @@ void GUI :: draw_ascii(AUI *aui) {
   ascii_data_t* data = aui->getAsciiBuffer();
   for (auint i = 0; i < data->height; ++i) {
     for (auint j = 0; j < data->width; ++j) {
-      char single_str[] = {data->data[i][j], '\0'};
+      char single_str[] = {data->char_strip[i * data->width + j], '\0'};
       ImGui::Text(single_str);
       ImGui::SameLine(0.0f, 0.0f);
     }
     ImGui::Text("\n");
-    free(data->data[i]);
   }
-  free(data->data);
+  free(data->char_strip);
   free(data);
 }
 

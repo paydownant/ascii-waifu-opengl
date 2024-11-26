@@ -36,22 +36,18 @@ void AUI :: drawAUI(FILE *output_ptr) {
 }
 
 ascii_data* AUI :: getAsciiBuffer() {
-  char **full = (char**)malloc(sizeof(char*) * height);
-  assert(full);
+  char *strip = (char*)malloc(sizeof(char*) * width * height);
+  assert(strip);
   for (auint i = 0; i < height; ++i) {
-    char *row = (char*)malloc(sizeof(char) * (width + 1));
-    assert(row);
     for (auint j = 0; j < width; ++j) {
       auint point_index = (auint)(pow(vertices[i * width + j].level, 1.2) * 8);
-      row[j] = points[point_index];
+      strip[i * width + j] = points[point_index];
     }
-    row[width] = '\0';
-    full[i] = row;
   }
 
   ascii_data_t *data = (ascii_data_t*)malloc(sizeof(ascii_data_t));
   assert(data);
-  data->data = full;
+  data->char_strip = strip;
   data->width = width;
   data->height = height;
   
