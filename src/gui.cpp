@@ -115,7 +115,7 @@ void GUI :: run() {
 
 
 void GUI :: aui_window(bool is_open, AUI *aui) {
-  ImGui::SetNextWindowSize(ImVec2(window_width, window_height));
+  ImGui::SetNextWindowSize(ImVec2(display_w, display_h));
   ImGui::SetNextWindowPos(ImVec2(0, 0));
 
   ImGui::Begin("Phantom", &is_open, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoInputs);
@@ -129,7 +129,7 @@ void GUI :: aui_window(bool is_open, AUI *aui) {
 
 
 void GUI :: draw_ascii(AUI *aui) {
-  auchar points[4] = {'l', 'u', 'c', 'y'};
+  auchar points[4] = {'L', 'U', 'C', 'Y'};
 
   ascii_data_t* data = aui->getAsciiBuffer(points, 4);
   for (auint i = 0; i < data->height; ++i) {
