@@ -10,9 +10,9 @@
 Image :: Image(const std::string filename) {
     const char *filename_c = filename.c_str();
     if (read(filename_c)) {
-        printf("Read: %s\n", filename_c);
+        fprintf(stderr, "Read: %s\n", filename_c);
     } else {
-        printf("Failed to Read: %s\n", filename_c);
+        fprintf(stderr, "Failed to Read: %s\n", filename_c);
     }
     size = w*h*components;
 }
