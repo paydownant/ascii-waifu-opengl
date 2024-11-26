@@ -54,6 +54,7 @@ target_include_directories(ImGui PUBLIC ${IMGUI_BACKENDS_DIR})
 
 add_executable(${PROJECT_NAME}
   src/main.cpp
+  src/gui.cpp
   src/imagesource.cpp
   src/aui.cpp
 )
