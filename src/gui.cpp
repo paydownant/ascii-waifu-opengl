@@ -20,14 +20,16 @@ GUI :: GUI() {
   window_height = 1300;
   window_title = strdup("AsciiWaifu");
   window_style = DARK;
-  bg_colour = ImVec4(0.1f, 0.1f, 0.1f, 1.0f);
+  bg_colour = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
   font_size = 20;
 
   aui_path = strdup("../images/lucy.png");
 
   ascii_font_path = strdup("../fonts/Technology/Technology-Bold.ttf");
-  ascii_aspect_ratio = 0.45f;
+  ascii_aspect_ratio = 0.4f;
   ascii_scaling = 2.2f;
+
+  ascii_set = strdup("LUCY");
 
 }
 
@@ -136,9 +138,8 @@ void GUI :: aui_window(bool is_open, AUI *aui) {
 
 
 void GUI :: draw_ascii(AUI *aui) {
-  auchar points[4] = {'L', 'U', 'C', 'Y'};
 
-  ascii_data_t* data = aui->getAsciiBuffer(points, 4);
+  ascii_data_t* data = aui->getAsciiBuffer(ascii_set, strlen(ascii_set));
   for (auint i = 0; i < data->height; ++i) {
     for (auint j = 0; j < data->width; ++j) {
       float r_level, g_level, b_level;

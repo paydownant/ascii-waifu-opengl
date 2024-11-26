@@ -48,6 +48,8 @@ private:
   ImFont *ascii_font;
   float ascii_aspect_ratio;
   float ascii_scaling;
+
+  auchar *ascii_set;
   
   
   void aui_window(bool is_open, AUI *aui);
