@@ -10,10 +10,47 @@
 
 typedef unsigned int auint;
 
+struct AuVec3 {
+  float x, y, z; // Components of the vector
+  // Constructor
+  AuVec3(float x = 0.0f, float y = 0.0f, float z = 0.0f) : x(x), y(y), z(z) {}
+
+  // Vector addition
+  AuVec3 operator+(const AuVec3& other) const {
+    return AuVec3(x + other.x, y + other.y, z + other.z);
+  }
+
+  // Vector subtraction
+  AuVec3 operator-(const AuVec3& other) const {
+    return AuVec3(x - other.x, y - other.y, z - other.z);
+  }
+
+  // Scalar multiplication
+  AuVec3 operator*(float scalar) const {
+    return AuVec3(x * scalar, y * scalar, z * scalar);
+  }
+
+  // Dot product
+  float dot(const AuVec3& other) const {
+    return x * other.x + y * other.y + z * other.z;
+  }
+
+  // Cross product
+  AuVec3 cross(const AuVec3& other) const {
+    return AuVec3(
+      y * other.z - z * other.y,
+      z * other.x - x * other.z,
+      x * other.y - y * other.x
+    );
+  }
+};
+
+
 typedef struct ascii_data {
   auint width = 0;
   auint height = 0;
-  char **data = nullptr;
+  char *char_strip = nullptr;
+  AuVec3 *colour_strip = nullptr;
 } ascii_data_t;
 
 typedef struct vertex {

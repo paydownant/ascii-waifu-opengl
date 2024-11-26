@@ -36,22 +36,18 @@ void AUI :: drawAUI(FILE *output_ptr) {
 }
 
 ascii_data* AUI :: getAsciiBuffer() {
-  char **full = (char**)malloc(sizeof(char*) * height);
-  assert(full);
+  char *strip = (char*)malloc(sizeof(char*) * width * height);
+  assert(strip);
   for (auint i = 0; i < height; ++i) {
-    char *row = (char*)malloc(sizeof(char) * (width + 1));
-    assert(row);
     for (auint j = 0; j < width; ++j) {
       auint point_index = (auint)(pow(vertices[i * width + j].level, 1.2) * 8);
-      row[j] = points[point_index];
+      strip[i * width + j] = points[point_index];
     }
-    row[width] = '\0';
-    full[i] = row;
   }
 
   ascii_data_t *data = (ascii_data_t*)malloc(sizeof(ascii_data_t));
   assert(data);
-  data->data = full;
+  data->char_strip = strip;
   data->width = width;
   data->height = height;
   
@@ -61,7 +57,7 @@ ascii_data* AUI :: getAsciiBuffer() {
 bool AUI :: createVertexBuffer(std::string file_path, u_int target_width_px, float aspect_ratio) {
   // Load Image
   Image img(file_path);
-  printf("Loaded %d x %d Image\n", img.w, img.h);
+  fprintf(stderr, "Loaded %d x %d Image\n", img.w, img.h);
 
   float ratio_width = (float)target_width_px / img.w;
   float ratio_height = ratio_width * aspect_ratio;
@@ -83,11 +79,12 @@ bool AUI :: createVertexBuffer(std::string file_path, u_int target_width_px, flo
 
       u_int dataIndex = (u_int)((float)i / ratio_height) * img.w + (u_int)((float)j / ratio_width);
       float bw_level = (float)img.data[dataIndex] / 256;
-      float threshold = 0.01;
-      if (bw_level > threshold && bw_level + threshold < 1.0) {
-        vertices[index].level = bw_level; // later apply gamma curve here
-      } else {
+      float threshold = 0.05;
+
+      if (bw_level < threshold) {
         vertices[index].level = 0;
+      } else {
+        vertices[index].level = bw_level;
       }
     }
   }
@@ -95,7 +92,7 @@ bool AUI :: createVertexBuffer(std::string file_path, u_int target_width_px, flo
   width = target_width;
   height = target_height;
 
-  printf("Created %d x %d Buffer\n", target_width, target_height);
+  fprintf(stderr, "Created %d x %d Buffer\n", target_width, target_height);
 
   return true;
 }
