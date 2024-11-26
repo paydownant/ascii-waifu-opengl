@@ -69,7 +69,6 @@ void GUI :: run() {
 
   // Setup Platform/Renderer backends
   ImGui_ImplGlfw_InitForOpenGL(window, true);
-
   ImGui_ImplOpenGL3_Init(glsl_version);
 
   // Load fonts here
@@ -133,12 +132,18 @@ void GUI :: aui_window(bool is_open, AUI *aui) {
 void GUI :: draw_ascii(AUI *aui) {
   ascii_data_t* data = aui->getAsciiBuffer();
   for (auint i = 0; i < data->height; ++i) {
-    ImGui::Text(data->data[i]);
+    for (auint j = 0; j < data->width; ++j) {
+      char single_str[] = {data->data[i][j], '\0'};
+      ImGui::Text(single_str);
+      ImGui::SameLine(0.0f, 0.0f);
+    }
+    ImGui::Text("\n");
     free(data->data[i]);
   }
   free(data->data);
   free(data);
 }
+
 
 static void glfw_error_callback(int error, const char* description) {
   fprintf(stderr, "GLFW Error %d: %s\n", error, description);
