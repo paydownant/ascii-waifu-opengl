@@ -36,6 +36,7 @@ private:
   GLFWwindow* window = nullptr;
   char *window_title = nullptr;
   int window_style = DARK;
+  ImVec4 bg_colour;
 
   int display_w, display_h;
 
@@ -43,6 +44,12 @@ private:
 
   char *aui_path;
 
+  char *ascii_font_path;
+  ImFont *ascii_font;
+  float ascii_aspect_ratio;
+  float ascii_scaling;
+  
+  
   void aui_window(bool is_open, AUI *aui);
   void draw_ascii(AUI *aui);
 

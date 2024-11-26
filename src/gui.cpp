@@ -20,8 +20,14 @@ GUI :: GUI() {
   window_height = 1300;
   window_title = strdup("AsciiWaifu");
   window_style = DARK;
+  bg_colour = ImVec4(0.1f, 0.1f, 0.1f, 1.0f);
+  font_size = 20;
 
   aui_path = strdup("../images/lucy.png");
+
+  ascii_font_path = strdup("../fonts/Technology/Technology-Bold.ttf");
+  ascii_aspect_ratio = 0.45f;
+  ascii_scaling = 2.2f;
 
 }
 
@@ -71,15 +77,15 @@ void GUI :: run() {
   ImGui_ImplOpenGL3_Init(glsl_version);
 
   // Load fonts here
-  font_size = 7;
+  ascii_font = io.Fonts->AddFontFromFileTTF(ascii_font_path, font_size, NULL, io.Fonts->GetGlyphRangesDefault());
 
   // State
-  ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);  // I know, I know, but leave the .f for future changes
+  ImVec4 clear_color = bg_colour;
   bool is_open;
 
   AUI *aui = new AUI();
-  int ascii_resolution = window_width / font_size;
-  aui->createVertexBuffer(aui_path, ascii_resolution, 0.45);
+  int ascii_resolution = ascii_scaling * window_width / font_size;
+  aui->createVertexBuffer(aui_path, ascii_resolution, ascii_aspect_ratio);
   
   // Main Loop
   while (!glfwWindowShouldClose(window)) {
@@ -103,7 +109,7 @@ void GUI :: run() {
     
     glfwGetFramebufferSize(window, &display_w, &display_h);
     glViewport(0, 0, display_w, display_h);
-    glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
+    glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
     glClear(GL_COLOR_BUFFER_BIT);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -117,6 +123,7 @@ void GUI :: run() {
 void GUI :: aui_window(bool is_open, AUI *aui) {
   ImGui::SetNextWindowSize(ImVec2(display_w, display_h));
   ImGui::SetNextWindowPos(ImVec2(0, 0));
+  ImGui::SetNextWindowBgAlpha(0.0);
 
   ImGui::Begin("Phantom", &is_open, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoInputs);
     
@@ -140,12 +147,14 @@ void GUI :: draw_ascii(AUI *aui) {
       b_level = data->colour_strip[i * data->width + j].z;
       
       ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(r_level, g_level, b_level, 1.0f));
+      ImGui::PushFont(ascii_font);
       ImGui::Text("%c", data->char_strip[i * data->width + j]);
+      ImGui::PopFont();
       ImGui::PopStyleColor();
 
       ImGui::SameLine(0.0f, 0.0f);
     }
-    ImGui::Text("");
+    ImGui::NewLine();
   }
   free(data->char_strip);
   free(data->colour_strip);
