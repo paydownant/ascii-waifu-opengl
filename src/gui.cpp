@@ -23,7 +23,6 @@ GUI :: GUI() {
 
   aui_path = strdup("../images/lucy.png");
 
-  
 }
 
 GUI :: ~GUI() {
@@ -130,16 +129,26 @@ void GUI :: aui_window(bool is_open, AUI *aui) {
 
 
 void GUI :: draw_ascii(AUI *aui) {
-  ascii_data_t* data = aui->getAsciiBuffer();
+  auchar points[4] = {'l', 'u', 'c', 'y'};
+
+  ascii_data_t* data = aui->getAsciiBuffer(points, 4);
   for (auint i = 0; i < data->height; ++i) {
     for (auint j = 0; j < data->width; ++j) {
-      char single_str[] = {data->char_strip[i * data->width + j], '\0'};
-      ImGui::Text(single_str);
+      float r_level, g_level, b_level;
+      r_level = data->colour_strip[i * data->width + j].x;
+      g_level = data->colour_strip[i * data->width + j].y;
+      b_level = data->colour_strip[i * data->width + j].z;
+      
+      ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(r_level, g_level, b_level, 1.0f));
+      ImGui::Text("%c", data->char_strip[i * data->width + j]);
+      ImGui::PopStyleColor();
+
       ImGui::SameLine(0.0f, 0.0f);
     }
-    ImGui::Text("\n");
+    ImGui::Text("");
   }
   free(data->char_strip);
+  free(data->colour_strip);
   free(data);
 }
 

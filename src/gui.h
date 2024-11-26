@@ -45,6 +45,7 @@ private:
 
   void aui_window(bool is_open, AUI *aui);
   void draw_ascii(AUI *aui);
+
 public:
   GUI();
   ~GUI();

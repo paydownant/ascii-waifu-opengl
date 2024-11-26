@@ -31,7 +31,7 @@ class Image {
     public:
         int w;
         int h;
-        const int components = 1;
+        const int components = 4;
         uint8_t* data = NULL;
         size_t size = 0;
         
