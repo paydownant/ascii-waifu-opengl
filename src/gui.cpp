@@ -25,7 +25,7 @@ GUI :: GUI() {
 
   aui_path = strdup("../images/lucy.png");
 
-  ascii_font_path = strdup("../fonts/Technology/Technology-Bold.ttf");
+  ascii_font_path = strdup("../fonts/Technology/Technology.ttf");
   ascii_aspect_ratio = 0.4f;
   ascii_scaling = 2.2f;
 
@@ -127,7 +127,7 @@ void GUI :: aui_window(bool is_open, AUI *aui) {
   ImGui::SetNextWindowPos(ImVec2(0, 0));
   ImGui::SetNextWindowBgAlpha(0.0);
 
-  ImGui::Begin("Phantom", &is_open, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoInputs);
+  ImGui::Begin("Phantom", &is_open, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings);
     
   ImGui::Text(aui_path);
 
