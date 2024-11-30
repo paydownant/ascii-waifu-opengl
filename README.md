@@ -12,8 +12,13 @@ Cmake works for only for linux at this time since some dependencies fails to con
 <hr>
 
 <h4>Dependencies</h4>
-  - glfw3 (apt install libglfw3 and libglfw3-dev)
-  - xorg (apt install xorg-dev)
+
+GUI: [ImGui](https://github.com/ocornut/imgui) by [ocornut](https://github.com/ocornut)
+<br>
+Image Reader: [stb](https://github.com/nothings/stb) by [nothings](https://github.com/nothings)
+
+- glfw3
+- xorg
 
 <hr>
 
@@ -44,3 +49,4 @@ Based on artwork: "Future Diary" Original Anime Art Cutout
 <br><br>
 
 <hr>
+
