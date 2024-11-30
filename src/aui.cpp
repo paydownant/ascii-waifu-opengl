@@ -2,6 +2,8 @@
 
 #include <assert.h>
 
+#include <stdexcept>
+
 AUI :: AUI() {
 }
 
@@ -121,14 +123,20 @@ void AUI :: clean_vertex_buffer() {
 }
 
 bool AUI :: load_base_image(std::string image_path) {
+  
+  Image *tmp_img_data;
+  try {
+    tmp_img_data = new Image(image_path);
+  } catch(const std::invalid_argument& e) {
+    return false;
+  }
+  
   if (img_data != nullptr) {
     clean_base_image();
   }
-  img_data = new Image(image_path);
 
-  if (img_data == nullptr) {
-    return false;
-  }
+  img_data = tmp_img_data;
+
   return true;
 }
 

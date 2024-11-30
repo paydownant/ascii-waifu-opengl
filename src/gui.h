@@ -47,12 +47,13 @@ private:
   struct DrawProperties {
     int resolution;
     float aspect_ratio;
-    float ascii_scale = 1.0f;
+    float ascii_scale;
     AsciiFont ascii_font;
     ToolFont tool_font;
   };
 
   struct Widgets {
+    bool button_load_base_image = false;
     bool slider_scale = false;
     bool slider_aspect_ratio = false;
     bool slider_font_size = false;
@@ -90,10 +91,10 @@ private:
   Font font;
   
   bool w_open_ascii, w_open_tool;
-  
+
+  void process_input();
   void ascii_window(bool is_open);
   void tool_window(bool is_open);
-
 
   void draw_ascii();
   void update_resolution();

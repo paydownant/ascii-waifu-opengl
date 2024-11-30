@@ -6,6 +6,8 @@
 #include "stb_image/stb_image.h"
 #include "stb_image/stb_image_write.h"
 
+#include <stdexcept>
+
 
 Image :: Image(const std::string filename) {
     const char *filename_c = filename.c_str();
@@ -13,6 +15,7 @@ Image :: Image(const std::string filename) {
         fprintf(stderr, "Read: %s\n", filename_c);
     } else {
         fprintf(stderr, "Failed to Read: %s\n", filename_c);
+        throw std::invalid_argument("File Not Found");
     }
     size = w*h*components;
 }

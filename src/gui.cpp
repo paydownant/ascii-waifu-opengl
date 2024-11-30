@@ -23,7 +23,7 @@ GUI :: GUI() {
   window_style = DARK;
   bg_colour = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
 
-  aui_path = strdup("../images/makima.jpg");
+  aui_path = strdup("../images/lucy.png");
 
   ascii_font_path = strdup("../fonts/Technology/Technology.ttf");
   tool_font_path = strdup("../fonts/OpenSans/OpenSans-VariableFont_wdth,wght.ttf");
@@ -92,7 +92,7 @@ void GUI :: run() {
   
   // Draw properties
   draw_properties.aspect_ratio = 0.4f;
-  draw_properties.ascii_scale = 1.0f;
+  draw_properties.ascii_scale = 2.0f;
   draw_properties.ascii_font.font = font.fonts[3];
   draw_properties.ascii_font.size = font.sizes[3];
   draw_properties.ascii_font.size_slider = font.sizes[3];
@@ -112,6 +112,9 @@ void GUI :: run() {
 
   // Main Loop
   while (!glfwWindowShouldClose(window)) {
+    // Process Input
+    process_input();
+
     // Poll and handle events
     glfwPollEvents();
     if (glfwGetWindowAttrib(window, GLFW_ICONIFIED) != 0) {
@@ -148,6 +151,12 @@ void GUI :: run() {
 
 }
 
+void GUI :: process_input() {
+  if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+    glfwSetWindowShouldClose(window, GLFW_TRUE);
+  }
+}
+
 void GUI :: ascii_window(bool is_open) {
   ImGui::SetNextWindowSize(ImVec2((float)display_w, (float)display_h));
   ImGui::SetNextWindowPos(ImVec2(0, 0));
@@ -166,7 +175,9 @@ void GUI :: tool_window(bool is_open) {
   ImGui::PushFont(draw_properties.tool_font.font);
   ImGui::Begin("Tools", &is_open, 0);
   
-  widgets.slider_scale = ImGui::SliderFloat("Scale", &draw_properties.ascii_scale, 0.1, 5.0, "%.2f Chrs");
+  ImGui::InputText("Base Image", aui_path, 100);
+  widgets.button_load_base_image = ImGui::Button("LOAD");
+  widgets.slider_scale = ImGui::SliderFloat("Scale", &draw_properties.ascii_scale, 0.1, 5.0, "%.2f");
   widgets.slider_aspect_ratio = ImGui::SliderFloat("Aspect Ratio", &draw_properties.aspect_ratio, 0.1, 0.9, "%.2f");
   widgets.slider_font_size = ImGui::SliderInt("Font Size", &draw_properties.ascii_font.size_slider,  font.sizes.front(), font.sizes.back(), "%d px");
   
@@ -176,20 +187,31 @@ void GUI :: tool_window(bool is_open) {
 
 
 void GUI :: draw_ascii() {
-  draw_properties.resolution = draw_properties.ascii_scale * window_width / draw_properties.ascii_font.size;
+
+  bool pend_update_buffer = false;
+
+  if (widgets.button_load_base_image) {
+    aui->load_base_image(aui_path);
+    pend_update_buffer = true;
+  }
 
   if (widgets.slider_scale || widgets.slider_aspect_ratio) {
     // update vertex buffer
-    aui->createVertexBuffer(draw_properties.resolution, draw_properties.aspect_ratio);
+    pend_update_buffer = true;
   }
 
   if (widgets.slider_font_size) {
     // update font size
     update_font_size();
-    update_resolution();
-    aui->createVertexBuffer(draw_properties.resolution, draw_properties.aspect_ratio);
-
+    pend_update_buffer = true;
   }
+
+  update_resolution();
+
+  if (pend_update_buffer) {
+    aui->createVertexBuffer(draw_properties.resolution, draw_properties.aspect_ratio);
+  }
+  
 
   ascii_data_t* data = aui->getAsciiBuffer(ascii_set, strlen(ascii_set));
   for (auint i = 0; i < data->height; ++i) {
