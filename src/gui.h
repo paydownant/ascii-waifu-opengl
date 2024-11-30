@@ -9,6 +9,8 @@
 
 #include "aui.h"
 
+#include <vector>
+
 // [Win32] Our example includes a copy of glfw3.lib pre-compiled with VS2010 to maximize ease of testing and compatibility with old VS compilers.
 // To link with VS2010-era libraries, VS2015+ requires linking with legacy_stdio_definitions.lib, which we do using this pragma.
 // Your own project should not be affected, as you are likely to link with a newer binary of GLFW that is adequate for your version of Visual Studio.
@@ -42,6 +44,12 @@ private:
     bool slider_aspect_ratio = false;
     bool slider_font_size = false;
   };
+
+  struct Font {
+    char *name = nullptr;
+    std::vector<ImFont *> fonts;
+    std::vector<int> sizes = {6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36};
+  };
   
   char *glsl_version = nullptr;
   int window_width = 0, window_height = 0;
@@ -57,7 +65,7 @@ private:
   AUI *aui = nullptr;
 
   char *ascii_font_path = nullptr;
-  ImFont *ascii_font = nullptr;
+
   float ascii_aspect_ratio;
   float ascii_scaling;
 
@@ -65,6 +73,7 @@ private:
 
   DrawProperties draw_properties;
   Widgets widgets;
+  Font font;
   
   bool w_open_ascii, w_open_tool;
   
@@ -72,6 +81,8 @@ private:
   void tool_window(bool is_open);
 
   void draw_ascii();
+
+  void load_fonts(ImFontAtlas *font_atlas, char *font_path);
 
 public:
   GUI();

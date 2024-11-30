@@ -87,7 +87,7 @@ void GUI :: run() {
   ImGui_ImplOpenGL3_Init(glsl_version);
 
   // Load fonts here
-  ascii_font = io.Fonts->AddFontFromFileTTF(ascii_font_path, draw_properties.font_size, NULL, io.Fonts->GetGlyphRangesDefault());
+  load_fonts(io.Fonts, ascii_font_path);
 
   // State
   ImVec4 clear_color = bg_colour;
@@ -168,9 +168,20 @@ void GUI :: draw_ascii() {
     // update vertex buffer
     aui->createVertexBuffer(draw_properties.resolution, draw_properties.aspect_ratio);
   }
+  ImFont *ascii_font = font.fonts[10];
   if (widgets.slider_font_size) {
-    // font
+    // update font size
+    uint fi = 0;
+    for (auto size : font.sizes) {
+      if (draw_properties.font_size == size) {
+        ascii_font = font.fonts[fi];
+        draw_properties.font_size = size;
+        break;
+      }
+      fi++;
+    }
   }
+
   ascii_data_t* data = aui->getAsciiBuffer(ascii_set, strlen(ascii_set));
   for (auint i = 0; i < data->height; ++i) {
     for (auint j = 0; j < data->width; ++j) {
@@ -193,6 +204,15 @@ void GUI :: draw_ascii() {
   free(data->colour_strip);
   free(data);
   
+}
+
+void GUI :: load_fonts(ImFontAtlas *font_atlas, char *font_path) {
+  font.name = font_path;
+  uint i = 0;
+  for (auto size : font.sizes) {
+    font.fonts.push_back((*font_atlas).AddFontFromFileTTF(font_path, size));
+    i++;
+  }
 }
 
 
