@@ -37,11 +37,18 @@ private:
     int font_size;
   };
 
+  struct Widgets {
+    bool slider_resolution = false;
+    bool slider_aspect_ratio = false;
+    bool slider_font_size = false;
+  };
+  
   char *glsl_version = nullptr;
   int window_width = 0, window_height = 0;
   GLFWwindow* window = nullptr;
   char *window_title = nullptr;
   int window_style = DARK;
+
   ImVec4 bg_colour;
 
   int display_w = 0, display_h = 0;
@@ -57,13 +64,14 @@ private:
   auchar *ascii_set = nullptr;
 
   DrawProperties draw_properties;
+  Widgets widgets;
   
   bool w_open_ascii, w_open_tool;
   
   void ascii_window(bool is_open);
   void tool_window(bool is_open);
 
-  void draw_ascii(AUI *aui);
+  void draw_ascii();
 
 public:
   GUI();

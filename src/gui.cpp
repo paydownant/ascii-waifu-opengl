@@ -98,6 +98,7 @@ void GUI :: run() {
 
   aui = new AUI();
   aui->load_base_image(aui_path);
+  aui->createVertexBuffer(draw_properties.resolution, draw_properties.aspect_ratio);
 
   // Main Loop
   while (!glfwWindowShouldClose(window)) {
@@ -146,7 +147,7 @@ void GUI :: ascii_window(bool is_open) {
 
   ImGui::Text(aui_path);
 
-  draw_ascii(aui);  
+  draw_ascii();  
     
   ImGui::End();
 }
@@ -154,16 +155,22 @@ void GUI :: ascii_window(bool is_open) {
 void GUI :: tool_window(bool is_open) {
   ImGui::Begin("Tools", &is_open, 0);
   
-  ImGui::SliderInt("Resolution", &draw_properties.resolution, 6, 250);
-  ImGui::SliderFloat("Aspect Ratio", &draw_properties.aspect_ratio, 0.1, 0.9, "%.2f");
-  ImGui::SliderInt("Font Size", &draw_properties.font_size, 1, 50);
+  widgets.slider_resolution = ImGui::SliderInt("Resolution", &draw_properties.resolution, 6, 250, "%d Chrs");
+  widgets.slider_aspect_ratio = ImGui::SliderFloat("Aspect Ratio", &draw_properties.aspect_ratio, 0.1, 0.9, "%.2f");
+  widgets.slider_font_size = ImGui::SliderInt("Font Size", &draw_properties.font_size, 1, 50, "%d px");
 
   ImGui::End();
 }
 
 
-void GUI :: draw_ascii(AUI *aui) {
-  aui->createVertexBuffer(draw_properties.resolution, draw_properties.aspect_ratio);
+void GUI :: draw_ascii() {
+  if (widgets.slider_resolution || widgets.slider_aspect_ratio) {
+    // update vertex buffer
+    aui->createVertexBuffer(draw_properties.resolution, draw_properties.aspect_ratio);
+  }
+  if (widgets.slider_font_size) {
+    // font
+  }
   ascii_data_t* data = aui->getAsciiBuffer(ascii_set, strlen(ascii_set));
   for (auint i = 0; i < data->height; ++i) {
     for (auint j = 0; j < data->width; ++j) {
