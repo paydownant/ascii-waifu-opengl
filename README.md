@@ -13,10 +13,8 @@ Cmake works for only for linux at this time since some dependencies fails to con
 
 <h4>Dependencies</h4>
 
-GUI: [ImGui](https://github.com/ocornut/imgui) by [ocornut](https://github.com/ocornut)
-<br>
-Image Reader: [stb](https://github.com/nothings/stb) by [nothings](https://github.com/nothings)
-
+- [ImGui](https://github.com/ocornut/imgui)
+- [stb](https://github.com/nothings/stb)
 - glfw3
 - xorg
 
