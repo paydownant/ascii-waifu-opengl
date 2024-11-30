@@ -23,14 +23,13 @@ GUI :: GUI() {
   window_style = DARK;
   bg_colour = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
 
-  aui_path = strdup("../images/lucy.png");
+  aui_path = strdup("../images/makima.jpg");
 
   ascii_font_path = strdup("../fonts/Technology/Technology.ttf");
+  tool_font_path = strdup("../fonts/OpenSans/OpenSans-VariableFont_wdth,wght.ttf");
 
   ascii_set = strdup("LUCY");
   
-  draw_properties.font_size = 20;
-  draw_properties.resolution = window_width / draw_properties.font_size;
   draw_properties.aspect_ratio = 0.4f;
 
 }
@@ -50,6 +49,7 @@ GUI :: ~GUI() {
 
   free(ascii_set);
   free(ascii_font_path);
+  free(tool_font_path);
   free(aui_path);
   free(window_title);
   free(glsl_version);
@@ -87,7 +87,17 @@ void GUI :: run() {
   ImGui_ImplOpenGL3_Init(glsl_version);
 
   // Load fonts here
-  load_fonts(io.Fonts, ascii_font_path);
+  draw_properties.tool_font.font = io.Fonts->AddFontFromFileTTF(tool_font_path, draw_properties.tool_font.size);
+  load_ascii_fonts(io.Fonts, ascii_font_path);
+  
+  // Draw properties
+  draw_properties.aspect_ratio = 0.4f;
+  draw_properties.ascii_scale = 1.0f;
+  draw_properties.ascii_font.font = font.fonts[3];
+  draw_properties.ascii_font.size = font.sizes[3];
+  draw_properties.ascii_font.size_slider = font.sizes[3];
+  update_resolution();
+  
 
   // State
   ImVec4 clear_color = bg_colour;
@@ -153,33 +163,32 @@ void GUI :: ascii_window(bool is_open) {
 }
 
 void GUI :: tool_window(bool is_open) {
+  ImGui::PushFont(draw_properties.tool_font.font);
   ImGui::Begin("Tools", &is_open, 0);
   
-  widgets.slider_resolution = ImGui::SliderInt("Resolution", &draw_properties.resolution, 6, 250, "%d Chrs");
+  widgets.slider_scale = ImGui::SliderFloat("Scale", &draw_properties.ascii_scale, 0.1, 5.0, "%.2f Chrs");
   widgets.slider_aspect_ratio = ImGui::SliderFloat("Aspect Ratio", &draw_properties.aspect_ratio, 0.1, 0.9, "%.2f");
-  widgets.slider_font_size = ImGui::SliderInt("Font Size", &draw_properties.font_size, 1, 50, "%d px");
-
+  widgets.slider_font_size = ImGui::SliderInt("Font Size", &draw_properties.ascii_font.size_slider,  font.sizes.front(), font.sizes.back(), "%d px");
+  
   ImGui::End();
+  ImGui::PopFont();
 }
 
 
 void GUI :: draw_ascii() {
-  if (widgets.slider_resolution || widgets.slider_aspect_ratio) {
+  draw_properties.resolution = draw_properties.ascii_scale * window_width / draw_properties.ascii_font.size;
+
+  if (widgets.slider_scale || widgets.slider_aspect_ratio) {
     // update vertex buffer
     aui->createVertexBuffer(draw_properties.resolution, draw_properties.aspect_ratio);
   }
-  ImFont *ascii_font = font.fonts[10];
+
   if (widgets.slider_font_size) {
     // update font size
-    uint fi = 0;
-    for (auto size : font.sizes) {
-      if (draw_properties.font_size == size) {
-        ascii_font = font.fonts[fi];
-        draw_properties.font_size = size;
-        break;
-      }
-      fi++;
-    }
+    update_font_size();
+    update_resolution();
+    aui->createVertexBuffer(draw_properties.resolution, draw_properties.aspect_ratio);
+
   }
 
   ascii_data_t* data = aui->getAsciiBuffer(ascii_set, strlen(ascii_set));
@@ -191,7 +200,7 @@ void GUI :: draw_ascii() {
       b_level = data->colour_strip[i * data->width + j].z;
       
       ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(r_level, g_level, b_level, 1.0f));
-      ImGui::PushFont(ascii_font);
+      ImGui::PushFont(draw_properties.ascii_font.font);
       ImGui::Text("%c", data->char_strip[i * data->width + j]);
       ImGui::PopFont();
       ImGui::PopStyleColor();
@@ -206,7 +215,28 @@ void GUI :: draw_ascii() {
   
 }
 
-void GUI :: load_fonts(ImFontAtlas *font_atlas, char *font_path) {
+void GUI :: update_resolution() {
+  draw_properties.resolution = draw_properties.ascii_scale * window_width / draw_properties.ascii_font.size;
+}
+
+void GUI :: update_font_size() {
+  int fp = 0;
+  for (auto size : font.sizes) {
+    if (size == draw_properties.ascii_font.size_slider) {
+      draw_properties.ascii_font.size = size;
+      draw_properties.ascii_font.font = font.fonts[fp];
+      break;
+    }
+    fp++;
+  }
+  draw_properties.ascii_font.size_slider = draw_properties.ascii_font.size;
+  
+}
+
+void GUI :: load_ascii_fonts(ImFontAtlas *font_atlas, char *font_path) {
+  if (font.name != nullptr) {
+    return;
+  }
   font.name = font_path;
   uint i = 0;
   for (auto size : font.sizes) {

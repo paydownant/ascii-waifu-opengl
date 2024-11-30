@@ -33,14 +33,27 @@ private:
     LIGHT
   };
 
+  struct AsciiFont {
+    ImFont *font = nullptr;
+    int size = 20;
+    int size_slider;
+  };
+
+  struct ToolFont {
+    ImFont *font = nullptr;
+    int size = 25;
+  };
+
   struct DrawProperties {
     int resolution;
     float aspect_ratio;
-    int font_size;
+    float ascii_scale = 1.0f;
+    AsciiFont ascii_font;
+    ToolFont tool_font;
   };
 
   struct Widgets {
-    bool slider_resolution = false;
+    bool slider_scale = false;
     bool slider_aspect_ratio = false;
     bool slider_font_size = false;
   };
@@ -48,7 +61,7 @@ private:
   struct Font {
     char *name = nullptr;
     std::vector<ImFont *> fonts;
-    std::vector<int> sizes = {6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36};
+    std::vector<int> sizes = {5,10,15,20,25,30};
   };
   
   char *glsl_version = nullptr;
@@ -65,6 +78,7 @@ private:
   AUI *aui = nullptr;
 
   char *ascii_font_path = nullptr;
+  char *tool_font_path = nullptr;
 
   float ascii_aspect_ratio;
   float ascii_scaling;
@@ -80,9 +94,11 @@ private:
   void ascii_window(bool is_open);
   void tool_window(bool is_open);
 
-  void draw_ascii();
 
-  void load_fonts(ImFontAtlas *font_atlas, char *font_path);
+  void draw_ascii();
+  void update_resolution();
+  void update_font_size();
+  void load_ascii_fonts(ImFontAtlas *font_atlas, char *font_path);
 
 public:
   GUI();
