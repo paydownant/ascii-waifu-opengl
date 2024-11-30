@@ -31,28 +31,38 @@ private:
     LIGHT
   };
 
+  struct DrawProperties {
+    int resolution;
+    float aspect_ratio;
+    int font_size;
+  };
+
   char *glsl_version = nullptr;
-  int window_width, window_height;
+  int window_width = 0, window_height = 0;
   GLFWwindow* window = nullptr;
   char *window_title = nullptr;
   int window_style = DARK;
   ImVec4 bg_colour;
 
-  int display_w, display_h;
+  int display_w = 0, display_h = 0;
 
-  int font_size = 0;
+  char *aui_path = nullptr;
+  AUI *aui = nullptr;
 
-  char *aui_path;
-
-  char *ascii_font_path;
-  ImFont *ascii_font;
+  char *ascii_font_path = nullptr;
+  ImFont *ascii_font = nullptr;
   float ascii_aspect_ratio;
   float ascii_scaling;
 
-  auchar *ascii_set;
+  auchar *ascii_set = nullptr;
+
+  DrawProperties draw_properties;
   
+  bool w_open_ascii, w_open_tool;
   
-  void aui_window(bool is_open, AUI *aui);
+  void ascii_window(bool is_open);
+  void tool_window(bool is_open);
+
   void draw_ascii(AUI *aui);
 
 public:

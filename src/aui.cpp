@@ -6,23 +6,11 @@ AUI :: AUI() {
 }
 
 AUI :: ~AUI() {
-  free(vertices);
+  printf("Terminating AUI\n");
+  clean_vertex_buffer();
+  clean_base_image();
 }
 
-void AUI :: run(std::string file_path, FILE *output_ptr, auint target_px) {
-  if (!createVertexBuffer(file_path, target_px, 0.4)) {
-    error_callback(1, "Failed to create vertex buffer");
-    exit(1);
-  }
-
-  if (output_ptr == nullptr) {
-    error_callback(1, "Failed create output file");
-    exit(1);
-  }
-
-  drawAUI(output_ptr);
-
-}
 
 void AUI :: drawAUI(FILE *output_ptr) {
   for (auint i = 0; i < height; ++i) {
@@ -36,10 +24,22 @@ void AUI :: drawAUI(FILE *output_ptr) {
 }
 
 ascii_data* AUI :: getAsciiBuffer(auchar *points, auint n_points) {
-  char *strip = (char*)malloc(sizeof(char*) * width * height);
-  assert(strip);
-  AuVec3 *colour_strip = (AuVec3*)malloc(sizeof(AuVec3) * width * height);
-  assert(colour_strip);
+
+  ascii_data_t *data = (ascii_data_t*)malloc(sizeof(ascii_data_t));
+  assert(data);
+  data->width = width;
+  data->height = height;
+
+  data->char_strip = (char*)malloc(sizeof(char*) * width * height);
+  if (data->char_strip == NULL) {
+    free(data);
+  }
+  data->colour_strip = (AuVec3*)malloc(sizeof(AuVec3) * width * height);
+  if (data->colour_strip == NULL) {
+    free(data->char_strip);
+    free(data);
+  }
+
   for (auint i = 0; i < height; ++i) {
     for (auint j = 0; j < width; ++j) {
       float r_level, g_level, b_level;
@@ -53,40 +53,43 @@ ascii_data* AUI :: getAsciiBuffer(auchar *points, auint n_points) {
       auint point_index = (auint)(pow(bw_level, 1.2) * n_points);
       
       if (bw_level > threshold) {
-        strip[i * width + j] = points[point_index];
+        data->char_strip[i * width + j] = points[point_index];
       } else {
-        strip[i * width + j] = ' ';
+        data->char_strip[i * width + j] = ' ';
       }
       
-      
-      colour_strip[i * width + j].x = vertices[i * width + j].level.x;
-      colour_strip[i * width + j].y = vertices[i * width + j].level.y;
-      colour_strip[i * width + j].z = vertices[i * width + j].level.z;
+      data->colour_strip[i * width + j].x = vertices[i * width + j].level.x;
+      data->colour_strip[i * width + j].y = vertices[i * width + j].level.y;
+      data->colour_strip[i * width + j].z = vertices[i * width + j].level.z;
     }
   }
-
-  ascii_data_t *data = (ascii_data_t*)malloc(sizeof(ascii_data_t));
-  assert(data);
-  data->char_strip = strip;
-  data->colour_strip = colour_strip;
-  data->width = width;
-  data->height = height;
   
   return data;
 }
 
-bool AUI :: createVertexBuffer(std::string file_path, auint target_width_px, float aspect_ratio) {
+bool AUI :: createVertexBuffer(auint target_width_px, float aspect_ratio) {
   // Load Image
-  Image img(file_path);
-  fprintf(stderr, "Loaded %d x %d Image\n", img.w, img.h);
 
-  float ratio_width = (float)target_width_px / img.w;
+  if (!img_data) {
+    fprintf(stderr, "No img_data found\n");
+    return false;
+  }
+
+  float ratio_width = (float)target_width_px / img_data->w;
   float ratio_height = ratio_width * aspect_ratio;
 
-  auint target_width = (auint)(ratio_width * img.w);
-  auint target_height = (auint)(ratio_height * img.h);
+  auint target_width = (auint)(ratio_width * img_data->w);
+  auint target_height = (auint)(ratio_height * img_data->h);
 
-  vertices = (vertex_t*)malloc(sizeof(vertex_t) * target_width * target_height);
+  if (target_width < 1) target_width = 1;
+  if (target_height < 1) target_height = 1;
+
+  if (vertices == nullptr) {
+    vertices = (vertex_t*)malloc(sizeof(vertex_t) * target_width * target_height);
+  } else {
+    vertices = (vertex_t*)realloc(vertices, sizeof(vertex_t) * target_width * target_height);
+  }
+
   if (vertices == nullptr) {
     error_callback(1, "Failed to allocate memory");
     return false;
@@ -95,13 +98,13 @@ bool AUI :: createVertexBuffer(std::string file_path, auint target_width_px, flo
   for (auint i = 0; i < target_height; ++i) {
     for (auint j = 0; j < target_width; ++j) {
       auint index = i * target_width + j;
-      auint dataIndexChunk = (auint)((float)i / ratio_height) * img.w * 4 + (auint)((float)j * 4 / ratio_width);
+      auint dataIndexChunk = (auint)((float)i / ratio_height) * img_data->w * 4 + (auint)((float)j * 4 / ratio_width);
       auint dataIndex = dataIndexChunk - dataIndexChunk % 4;
       float r_level, b_level, g_level, alpha_level;
-      r_level = (float)img.data[dataIndex + 0] / 256;
-      g_level = (float)img.data[dataIndex + 1] / 256;
-      b_level = (float)img.data[dataIndex + 2] / 256;
-      alpha_level = (float)img.data[dataIndex + 3] / 256;
+      r_level = (float)img_data->data[dataIndex + 0] / 256;
+      g_level = (float)img_data->data[dataIndex + 1] / 256;
+      b_level = (float)img_data->data[dataIndex + 2] / 256;
+      alpha_level = (float)img_data->data[dataIndex + 3] / 256;
       
       vertices[index].level = AuVec3(r_level, g_level, b_level);
     }
@@ -110,9 +113,27 @@ bool AUI :: createVertexBuffer(std::string file_path, auint target_width_px, flo
   width = target_width;
   height = target_height;
 
-  fprintf(stderr, "Created %d x %d Buffer\n", target_width, target_height);
-
   return true;
+}
+
+void AUI :: clean_vertex_buffer() {
+  free(vertices);
+}
+
+bool AUI :: load_base_image(std::string image_path) {
+  if (img_data != nullptr) {
+    clean_base_image();
+  }
+  img_data = new Image(image_path);
+
+  if (img_data == nullptr) {
+    return false;
+  }
+  return true;
+}
+
+void AUI :: clean_base_image() {
+  delete(img_data);
 }
 
 

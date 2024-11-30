@@ -64,6 +64,7 @@ class AUI {
 
 private:
 
+  Image *img_data = nullptr;
   auint width, height;
   vertex_t *vertices = nullptr;
 
@@ -74,9 +75,12 @@ public:
   AUI();
   ~AUI();
   ascii_data* getAsciiBuffer(auchar *points, auint n_points);
-  bool createVertexBuffer(std::string file_path, u_int target_width_px, float aspect_ratio);
+  
+  bool createVertexBuffer(u_int target_width_px, float aspect_ratio);
+  void clean_vertex_buffer();
 
-  void run(std::string file_path, FILE *output_ptr, auint target_px);
+  bool load_base_image(std::string image_path);
+  void clean_base_image();
 
 private:
   void drawAUI(FILE *output_ptr);
