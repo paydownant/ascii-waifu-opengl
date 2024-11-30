@@ -80,6 +80,7 @@ public:
   void clean_vertex_buffer();
 
   bool load_base_image(std::string image_path);
+  bool is_base_img_loaded();
   void clean_base_image();
 
 private:

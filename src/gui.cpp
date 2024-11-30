@@ -23,7 +23,8 @@ GUI :: GUI() {
   window_style = DARK;
   bg_colour = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
 
-  aui_path = strdup("../images/lucy.png");
+  aui_path = strdup("../images/");
+  //aui_path = strdup("../images/lucy.png");
 
   ascii_font_path = strdup("../fonts/Technology/Technology.ttf");
   tool_font_path = strdup("../fonts/OpenSans/OpenSans-VariableFont_wdth,wght.ttf");
@@ -107,8 +108,8 @@ void GUI :: run() {
   // Initial image
 
   aui = new AUI();
-  aui->load_base_image(aui_path);
-  aui->createVertexBuffer(draw_properties.resolution, draw_properties.aspect_ratio);
+  //aui->load_base_image(aui_path);
+  //aui->createVertexBuffer(draw_properties.resolution, draw_properties.aspect_ratio);
 
   // Main Loop
   while (!glfwWindowShouldClose(window)) {
@@ -193,6 +194,10 @@ void GUI :: draw_ascii() {
   if (widgets.button_load_base_image) {
     aui->load_base_image(aui_path);
     pend_update_buffer = true;
+  }
+
+  if (!aui->is_base_img_loaded()) {
+    return;
   }
 
   if (widgets.slider_scale || widgets.slider_aspect_ratio) {

@@ -130,13 +130,18 @@ bool AUI :: load_base_image(std::string image_path) {
   } catch(const std::invalid_argument& e) {
     return false;
   }
-  
+
   if (img_data != nullptr) {
     clean_base_image();
   }
 
   img_data = tmp_img_data;
 
+  return true;
+}
+
+bool AUI :: is_base_img_loaded() {
+  if (img_data == nullptr) return false;
   return true;
 }
 
