@@ -13,10 +13,14 @@ Cmake works for only for linux at this time since some dependencies fails to con
 
 <h4>Dependencies</h4>
 
-- [ImGui](https://github.com/ocornut/imgui)
-- [stb](https://github.com/nothings/stb)
+- [ImGui](https://github.com/ocornut/imgui) included
+- [stb](https://github.com/nothings/stb) included
 - glfw3
 - xorg
+
+Fonts
+- [Technology](https://www.1001fonts.com/technology-font.html) - Vladimir Nikolic
+- [OpenSans](https://fonts.google.com/specimen/Open+Sans) - Steve Matteson
 
 <hr>
 
