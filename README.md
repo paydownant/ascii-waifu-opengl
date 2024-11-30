@@ -1,52 +1,46 @@
-C++ Gui Test using ImGui
+<h3>
+C++ Ascii Interpretation of the Image with GUI using ImGui
+</h3>
 
-Build dir is included just for the sake of example. In applications, build dir needs to be cleaned and restarted using command:
+<hr>
+
+<h4>Build</h4>
   - cmake . -B <build_dir_path>
   - or enter build dir and cmake ..
 
 Cmake works for only for linux at this time since some dependencies fails to connect on mingw environment in linux.
+<hr>
 
-Dependencies: For opengl & opengl example
+<h4>Dependencies</h4>
   - glfw3 (apt install libglfw3 and libglfw3-dev)
   - xorg (apt install xorg-dev)
 
-Convert your waifu.image to ascii and output to your desired file stream!
+<hr>
+
+<h4>
+Convert your waifu.image to cool & colourful ascii interpretation!
+</h4>
+
+<img src="documents/window_demo.gif">
 
 Supports ascii resolution resizing, aspect ratio adjustment, and gamma correction.
 
-```
-Read: ../images/image.png
-Loaded 300 x 268 Image
-Created 88 x 31 Buffer
-           i!:..............................     ..........!!ii!iiillwwwwwl             
-         ii:::.............................          .... .:!i!ii!iiiwiwwiwi            
-         i!:..........................................     ::!!!!i!!!iiiiiii            
-        i!::............................................. ..::!!!::!!!!!!iii            
-       ii::..............................................:..:::!!!::!!!!!!!i!           
-      ii!:...........i!i:...............:i....:.:.........:::::!!!:::!!!:!!i!!          
-      i!:.....i......:iii...............!ii....i.:.........::::!!!::::!!::!::i          
-      i!:.:...!:i...:iiii...........i:.iiii:...ii:.....:....:::!!!:::.:::...: !!i       
-      !!:.....iii:..!iiiii!........!!:iiiiii..iiii.:i:......:::!!!:::.:.   ...:!        
-      !!......iiii . .:iiiii...!..ii:i:.....  ...............::!!!::::.   ...!          
-      !!......iiii:!ll:.iiiii..i.iiiiiill........i:iii.:....:::!!!:::::.:::!!!iii       
-      !!......!iiiii!iiliiiii!::iiiiiiiiilli:!wl!iiiii.......:!!!:::....:::::::!!!illl  
-      i!.....iiiiiiiii:!!iiiii!iiiiiiiiiiiiiiiiii!iii!......::!!!i.:::..:::::::!        
-      !!:...ii!iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii!i:.......:!:!.::::!  :::!!  iii     
-       !:...iii:!iiiiiiiiiiiiiiiii!i!iiiiii!iiiiii!i.........:::!::::!    !:::i         
-        !:.:iii!:iiiiiiiiiiiiiiiiiiiiiiiiiiiiiilwii:.i.........::::::!     !::!ii       
-        !:.. .iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiwiii:ii:........:!::.::!      !::!i       
-         !::...:iiiiiiiiiiiiiiiiiiiiiiiiiiiiwwiiiiii.........::!:::::!       !::!il     
-          !:: :..!iiiiiiiiiiiiiiiiiiiiiiiiiwwiiii!i.........::! :::::!        !::ii     
-           !!: ::.::iiiiiiiiiiiiiiiiiiiiiiww!iiiiii......::::!   :::::!       :::!ii    
-             !  :::: :iiiiiiiiiiiiiiiiiiiiwiiiiii: .....:: !i    !::::i       ::::ii    
-                 :::   !:!iiiiiiiiiiiiiiiw:!..      ..::: !i     !:::::!      ::::ii    
-                  !:   ::...!iiiiiiiiiiii!.        ...:  i        !:::::!    :::::ii    
-                   :    :....:iiiiiiiiiiw.        ...::::          ::::::!  ::.:::!i    
-               !::......     !iiiiiiiiilw        .   ...::::::!i    i!:::::!:::!!ii     
-             !.              !iiiiiiiiiw..                ....::!      !::::::!ii       
-           :.               !!iiiiiiiiww.                    ..::!!         i           
-           .               !!!i!iiiiiiw!.                    ..:::!                     
-         !.                !!!iiiiiiiil.                    ..::::!                     
-         .                !!!!iiiiiiiww.                   ...:::!!                     
-        :.               .!!!iiiiiiiiww.                  ....::::                      
-```
+Depending on the font used, it may have jagged edges or appear misaligned when displayed at different font sizes.
+
+<hr>
+
+<h4>Sample Outputs</h4>
+
+<img src="documents/lucy-tech.png">
+Based on artwork: "Cyberpunk: Edgerunners" Original Lucy Character Design
+<br><br>
+
+<img src="documents/makima.png">
+Based on artwork done by Whoami https://x.com/sok_0000
+<br><br>
+
+<img src="documents/yuno-tech.png">
+Based on artwork: "Future Diary" Original Anime Art Cutout
+<br><br>
+
+<hr>
