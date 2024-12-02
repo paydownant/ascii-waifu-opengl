@@ -24,7 +24,6 @@ GUI :: GUI() {
   bg_colour = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
 
   aui_path = strdup("../images/");
-  //aui_path = strdup("../images/lucy.png");
 
   ascii_font_path = strdup("../fonts/Technology/Technology.ttf");
   tool_font_path = strdup("../fonts/OpenSans/OpenSans-VariableFont_wdth,wght.ttf");
