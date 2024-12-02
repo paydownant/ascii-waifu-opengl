@@ -4,8 +4,8 @@
 #define GL_SILENCE_DEPRECATION
 
 #include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_opengl3.h"
 
 #include "aui.h"
 
