@@ -132,7 +132,6 @@ void GUI :: run() {
 
 
     // Body
-
     ascii_window(&w_open_ascii);
     tool_window(&w_open_tool);
 
@@ -184,7 +183,7 @@ void GUI :: process_input() {
   if (widgets.button_load_ascii_font) {
     // update font
     pend_update_buffer = true;
-    load_ascii_fonts();
+    //load_ascii_fonts();
     update_font_size();
   }
   
@@ -276,13 +275,12 @@ void GUI :: update_font_size() {
 void GUI :: load_tool_font() {
   draw_properties.tool_font.font = font_atlas->AddFontFromFileTTF(tool_font_path, draw_properties.tool_font.size, font_config, font_atlas->GetGlyphRangesDefault());
   font_atlas->Build();
-  printf("Loaded Tool Font\n");
 }
 
 void GUI :: load_ascii_fonts() {
 
   if (font_pixels.name != nullptr) {
-    remove_ascii_fonts();
+    //remove_ascii_fonts();
     font_pixels.fonts.clear();
   }
 
@@ -303,8 +301,6 @@ void GUI :: load_ascii_fonts() {
   draw_properties.ascii_font.font = font_pixels.fonts[3];
   draw_properties.ascii_font.size = font_pixels.sizes[3];
   draw_properties.ascii_font.size_slider = font_pixels.sizes[3];
-
-  printf("loaded font in %d sizes\n", font_pixels.fonts.size());
 }
 
 void GUI :: remove_ascii_fonts() {

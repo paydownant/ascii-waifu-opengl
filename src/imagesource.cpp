@@ -12,7 +12,7 @@
 Image :: Image(const std::string filename) {
     const char *filename_c = filename.c_str();
     if (read(filename_c)) {
-        fprintf(stderr, "Read: %s\n", filename_c);
+        //fprintf(stderr, "Read: %s\n", filename_c);
     } else {
         fprintf(stderr, "Failed to Read: %s\n", filename_c);
         throw std::invalid_argument("File Not Found");
