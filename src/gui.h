@@ -57,9 +57,11 @@ private:
     bool slider_scale = false;
     bool slider_aspect_ratio = false;
     bool slider_font_size = false;
+    bool input_ascii_char = false;
+    bool button_load_ascii_font = false;
   };
 
-  struct Font {
+  struct FontPixels {
     char *name = nullptr;
     std::vector<ImFont *> fonts;
     std::vector<int> sizes = {5,10,15,20,25,30};
@@ -81,14 +83,14 @@ private:
   char *ascii_font_path = nullptr;
   char *tool_font_path = nullptr;
 
-  float ascii_aspect_ratio;
-  float ascii_scaling;
-
   auchar *ascii_set = nullptr;
 
   DrawProperties draw_properties;
   Widgets widgets;
-  Font font;
+  FontPixels font_pixels;
+
+  ImFontAtlas *font_atlas = nullptr;
+  ImFontConfig *font_config = nullptr;
   
   bool w_open_ascii, w_open_tool;
 
@@ -99,7 +101,10 @@ private:
   void draw_ascii();
   void update_resolution();
   void update_font_size();
-  void load_ascii_fonts(ImFontAtlas *font_atlas, char *font_path);
+
+  void load_tool_font();
+  void load_ascii_fonts();
+  void remove_ascii_fonts();
 
 public:
   GUI();

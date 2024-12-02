@@ -3,7 +3,7 @@
 #include <GLFW/glfw3.h>
 
 #include "gui.h"
-
+#include "gui_widgets.h"
 
 GUI :: GUI() {
   glsl_version = strdup("#version 130");
@@ -23,13 +23,13 @@ GUI :: GUI() {
   window_style = DARK;
   bg_colour = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
 
-  aui_path = strdup("../images/");
-  //aui_path = strdup("../images/lucy.png");
+  //aui_path = strdup("../images/");
+  aui_path = strdup("../images/lucy.png");
 
   ascii_font_path = strdup("../fonts/Technology/Technology.ttf");
   tool_font_path = strdup("../fonts/OpenSans/OpenSans-VariableFont_wdth,wght.ttf");
 
-  ascii_set = strdup("LUCY");
+  ascii_set = strdup("O");
   
   draw_properties.aspect_ratio = 0.4f;
 
@@ -88,15 +88,16 @@ void GUI :: run() {
   ImGui_ImplOpenGL3_Init(glsl_version);
 
   // Load fonts here
-  draw_properties.tool_font.font = io.Fonts->AddFontFromFileTTF(tool_font_path, draw_properties.tool_font.size);
-  load_ascii_fonts(io.Fonts, ascii_font_path);
+  font_atlas = io.Fonts;
+  ImFontConfig font_config;
+
+  load_tool_font();
+  load_ascii_fonts();
   
-  // Draw properties
+  // Draw Properties Initial
   draw_properties.aspect_ratio = 0.4f;
   draw_properties.ascii_scale = 2.0f;
-  draw_properties.ascii_font.font = font.fonts[3];
-  draw_properties.ascii_font.size = font.sizes[3];
-  draw_properties.ascii_font.size_slider = font.sizes[3];
+
   update_resolution();
   
 
@@ -113,15 +114,16 @@ void GUI :: run() {
 
   // Main Loop
   while (!glfwWindowShouldClose(window)) {
-    // Process Input
-    process_input();
-
+    
     // Poll and handle events
     glfwPollEvents();
     if (glfwGetWindowAttrib(window, GLFW_ICONIFIED) != 0) {
       ImGui_ImplGlfw_Sleep(10);
       continue;
     }
+
+    // Process Input
+    process_input();
 
     // Start the ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
@@ -156,48 +158,12 @@ void GUI :: process_input() {
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
     glfwSetWindowShouldClose(window, GLFW_TRUE);
   }
-}
-
-void GUI :: ascii_window(bool is_open) {
-  ImGui::SetNextWindowSize(ImVec2((float)display_w, (float)display_h));
-  ImGui::SetNextWindowPos(ImVec2(0, 0));
-  ImGui::SetNextWindowBgAlpha(0.0);
-
-  ImGui::Begin("Phantom", &is_open, ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings);
-
-  ImGui::Text(aui_path);
-
-  draw_ascii();  
-    
-  ImGui::End();
-}
-
-void GUI :: tool_window(bool is_open) {
-  ImGui::PushFont(draw_properties.tool_font.font);
-  ImGui::Begin("Tools", &is_open, 0);
-  
-  ImGui::InputText("Base Image", aui_path, 100);
-  widgets.button_load_base_image = ImGui::Button("LOAD");
-  widgets.slider_scale = ImGui::SliderFloat("Scale", &draw_properties.ascii_scale, 0.1, 5.0, "%.2f");
-  widgets.slider_aspect_ratio = ImGui::SliderFloat("Aspect Ratio", &draw_properties.aspect_ratio, 0.1, 0.9, "%.2f");
-  widgets.slider_font_size = ImGui::SliderInt("Font Size", &draw_properties.ascii_font.size_slider,  font.sizes.front(), font.sizes.back(), "%d px");
-  
-  ImGui::End();
-  ImGui::PopFont();
-}
-
-
-void GUI :: draw_ascii() {
 
   bool pend_update_buffer = false;
 
   if (widgets.button_load_base_image) {
     aui->load_base_image(aui_path);
     pend_update_buffer = true;
-  }
-
-  if (!aui->is_base_img_loaded()) {
-    return;
   }
 
   if (widgets.slider_scale || widgets.slider_aspect_ratio) {
@@ -207,16 +173,63 @@ void GUI :: draw_ascii() {
 
   if (widgets.slider_font_size) {
     // update font size
-    update_font_size();
     pend_update_buffer = true;
+    update_font_size();
   }
 
-  update_resolution();
+  if (widgets.input_ascii_char) {
+    // no need to implement for now since ascii_set is updated every frame
+  }
 
-  if (pend_update_buffer) {
-    aui->createVertexBuffer(draw_properties.resolution, draw_properties.aspect_ratio);
+  if (widgets.button_load_ascii_font) {
+    // update font
+    pend_update_buffer = true;
+    load_ascii_fonts();
+    update_font_size();
   }
   
+  if (pend_update_buffer) {
+    update_resolution();
+    aui->createVertexBuffer(draw_properties.resolution, draw_properties.aspect_ratio);
+  }
+}
+
+void GUI :: ascii_window(bool is_open) {
+  ImGui::SetNextWindowSize(ImVec2((float)display_w, (float)display_h));
+  ImGui::SetNextWindowPos(ImVec2(0, 0));
+  ImGui::SetNextWindowBgAlpha(0.0);
+
+  ImGui::Begin("Phantom", &is_open, ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings);
+
+  ImGui::PushFont(draw_properties.tool_font.font);
+  ImGui::Text(aui_path);
+  ImGui::PopFont();
+
+  draw_ascii();
+    
+  ImGui::End();
+}
+
+void GUI :: tool_window(bool is_open) {
+  ImGui::PushFont(draw_properties.tool_font.font);
+  ImGui::Begin("Tools", &is_open, 0);
+  
+  widgets.button_load_base_image = gui_path_load_button(*this, "Image Path", &aui_path);
+  widgets.slider_scale = gui_slider_float(*this, "Scale", &draw_properties.ascii_scale, 0.1, 5.0);
+  widgets.slider_aspect_ratio = gui_slider_float(*this, "Aspect Ratio", &draw_properties.aspect_ratio, 0.1, 0.9);
+  widgets.slider_font_size = gui_slider_int(*this, "Font Size", &draw_properties.ascii_font.size_slider, font_pixels.sizes.front(), font_pixels.sizes.back());
+  widgets.input_ascii_char = gui_text_input(*this, "Ascii Set", &ascii_set);
+  widgets.button_load_ascii_font = gui_path_load_button(*this, "Font Path", &ascii_font_path);
+
+  ImGui::End();
+  ImGui::PopFont();
+}
+
+void GUI :: draw_ascii() {
+
+  if (!aui->is_base_img_loaded()) {
+    return;
+  }  
 
   ascii_data_t* data = aui->getAsciiBuffer(ascii_set, strlen(ascii_set));
   for (auint i = 0; i < data->height; ++i) {
@@ -248,10 +261,10 @@ void GUI :: update_resolution() {
 
 void GUI :: update_font_size() {
   int fp = 0;
-  for (auto size : font.sizes) {
+  for (auto size : font_pixels.sizes) {
     if (size == draw_properties.ascii_font.size_slider) {
       draw_properties.ascii_font.size = size;
-      draw_properties.ascii_font.font = font.fonts[fp];
+      draw_properties.ascii_font.font = font_pixels.fonts[fp];
       break;
     }
     fp++;
@@ -260,16 +273,44 @@ void GUI :: update_font_size() {
   
 }
 
-void GUI :: load_ascii_fonts(ImFontAtlas *font_atlas, char *font_path) {
-  if (font.name != nullptr) {
-    return;
+void GUI :: load_tool_font() {
+  draw_properties.tool_font.font = font_atlas->AddFontFromFileTTF(tool_font_path, draw_properties.tool_font.size, font_config, font_atlas->GetGlyphRangesDefault());
+  font_atlas->Build();
+  printf("Loaded Tool Font\n");
+}
+
+void GUI :: load_ascii_fonts() {
+
+  if (font_pixels.name != nullptr) {
+    remove_ascii_fonts();
+    font_pixels.fonts.clear();
   }
-  font.name = font_path;
+
+  font_pixels.name = ascii_font_path;
+
   uint i = 0;
-  for (auto size : font.sizes) {
-    font.fonts.push_back((*font_atlas).AddFontFromFileTTF(font_path, size));
+  for (auto size : font_pixels.sizes) {
+    font_pixels.fonts.push_back(font_atlas->AddFontFromFileTTF(ascii_font_path, size, font_config, font_atlas->GetGlyphRangesDefault()));
     i++;
   }
+  font_atlas->Build();
+
+  if (font_pixels.fonts.size() != font_pixels.sizes.size()) {
+    fprintf(stderr, "Font Load Error: Unmatched Font Number\n");
+    return;
+  }
+
+  draw_properties.ascii_font.font = font_pixels.fonts[3];
+  draw_properties.ascii_font.size = font_pixels.sizes[3];
+  draw_properties.ascii_font.size_slider = font_pixels.sizes[3];
+
+  printf("loaded font in %d sizes\n", font_pixels.fonts.size());
+}
+
+void GUI :: remove_ascii_fonts() {
+  font_atlas->Clear();
+  font_atlas->AddFontDefault();
+  load_tool_font();
 }
 
 

@@ -8,7 +8,7 @@ C++ Ascii Interpretation of the Image with GUI using ImGui
   - cmake . -B <build_dir_path>
   - or enter build dir and cmake ..
 
-Cmake works for only for linux at this time since some dependencies fails to connect on mingw environment in linux.
+Cmake works only for linux at this time since some dependencies fails to connect on mingw environment in linux.
 <hr>
 
 <h4>Dependencies</h4>
@@ -18,7 +18,8 @@ Cmake works for only for linux at this time since some dependencies fails to con
 - glfw3
 - xorg
 
-Fonts
+<h4>Fonts</h4>
+
 - [Technology](https://www.1001fonts.com/technology-font.html) - Vladimir Nikolic
 - [OpenSans](https://fonts.google.com/specimen/Open+Sans) - Steve Matteson
 
