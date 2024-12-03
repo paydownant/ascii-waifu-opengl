@@ -25,8 +25,9 @@ GUI :: GUI() {
 
   aui_path = strdup("../images/");
 
-  ascii_font_path = strdup("../fonts/Technology/Technology.ttf");
   tool_font_path = strdup("../fonts/OpenSans/OpenSans-VariableFont_wdth,wght.ttf");
+  ascii_font_path = strdup("../fonts/Technology/Technology.ttf");
+  //ascii_font_path = strdup("../fonts/");
 
   ascii_set = strdup("O");
   
@@ -77,6 +78,9 @@ void GUI :: run() {
   case DARK:
     ImGui::StyleColorsDark();
     break;
+  case LIGHT:
+    ImGui::StyleColorsLight();
+    break;
   default:
     ImGui::StyleColorsDark();
     break;
@@ -90,15 +94,15 @@ void GUI :: run() {
   font_atlas = io.Fonts;
   ImFontConfig font_config;
 
-  load_tool_font();
-  load_ascii_fonts();
-  
+  //load_tool_font();
+  //load_ascii_fonts();
+  load_fonts();
+
   // Draw Properties Initial
   draw_properties.aspect_ratio = 0.4f;
   draw_properties.ascii_scale = 2.0f;
 
   update_resolution();
-  
 
   // State
   ImVec4 clear_color = bg_colour;
@@ -182,7 +186,7 @@ void GUI :: process_input() {
   if (widgets.button_load_ascii_font) {
     // update font
     pend_update_buffer = true;
-    //load_ascii_fonts();
+    load_fonts();
     update_font_size();
   }
   
@@ -254,10 +258,15 @@ void GUI :: draw_ascii() {
 }
 
 void GUI :: update_resolution() {
-  draw_properties.resolution = draw_properties.ascii_scale * window_width / draw_properties.ascii_font.size;
+  draw_properties.resolution = draw_properties.ascii_scale * window_width / draw_properties.ascii_font.size + (draw_properties.resolution * (.5f - draw_properties.aspect_ratio));
 }
 
 void GUI :: update_font_size() {
+  if (!draw_properties.use_custom_font) {
+    draw_properties.ascii_font.size_slider = draw_properties.ascii_font.size;
+    return;
+  }
+  
   int fp = 0;
   for (auto size : font_pixels.sizes) {
     if (size == draw_properties.ascii_font.size_slider) {
@@ -273,39 +282,65 @@ void GUI :: update_font_size() {
 
 void GUI :: load_tool_font() {
   draw_properties.tool_font.font = font_atlas->AddFontFromFileTTF(tool_font_path, draw_properties.tool_font.size, font_config, font_atlas->GetGlyphRangesDefault());
-  font_atlas->Build();
 }
 
 void GUI :: load_ascii_fonts() {
-
-  if (font_pixels.name != nullptr) {
-    //remove_ascii_fonts();
-    font_pixels.fonts.clear();
-  }
-
   font_pixels.name = ascii_font_path;
 
   uint i = 0;
   for (auto size : font_pixels.sizes) {
-    font_pixels.fonts.push_back(font_atlas->AddFontFromFileTTF(ascii_font_path, size, font_config, font_atlas->GetGlyphRangesDefault()));
+    ImFont *new_ascii_font = font_atlas->AddFontFromFileTTF(ascii_font_path, size, font_config, font_atlas->GetGlyphRangesDefault());
+    new_ascii_font->FontSize = size;
+    font_pixels.fonts.push_back(new_ascii_font);
     i++;
   }
-  font_atlas->Build();
 
   if (font_pixels.fonts.size() != font_pixels.sizes.size()) {
     fprintf(stderr, "Font Load Error: Unmatched Font Number\n");
     return;
   }
 
-  draw_properties.ascii_font.font = font_pixels.fonts[3];
-  draw_properties.ascii_font.size = font_pixels.sizes[3];
-  draw_properties.ascii_font.size_slider = font_pixels.sizes[3];
+  draw_properties.use_custom_font = true;
+
 }
 
-void GUI :: remove_ascii_fonts() {
-  font_atlas->Clear();
-  font_atlas->AddFontDefault();
-  load_tool_font();
+void GUI :: load_fonts() {
+
+  bool initial_call = false;
+  if (draw_properties.tool_font.font == nullptr) initial_call = true;
+
+  // Check if Font Paths Exists and Loads Fonts
+  if (tool_font_path && ascii_font_path) {
+    if (!initial_call) {
+      font_pixels.fonts.clear();
+      font_atlas->Clear();
+    }
+    draw_properties.im_default_font = font_atlas->AddFontDefault();
+    load_tool_font();
+    load_ascii_fonts();
+
+    if (initial_call) {
+      // setting the custom font default values
+      draw_properties.ascii_font.font = font_pixels.fonts[3];
+      draw_properties.ascii_font.size = font_pixels.sizes[3];
+      draw_properties.ascii_font.size_slider = font_pixels.sizes[3];
+    }
+
+  } else {
+    if (initial_call) {
+      // In initialisation, if it fails to find fonts, load default gui font
+      draw_properties.im_default_font = font_atlas->AddFontDefault();
+      draw_properties.tool_font.font = draw_properties.im_default_font;
+      draw_properties.ascii_font.font = draw_properties.im_default_font;
+    } else {
+      return;
+    }
+  }
+
+  font_atlas->Build();
+  ImGui_ImplOpenGL3_DestroyFontsTexture();
+  ImGui_ImplOpenGL3_CreateFontsTexture();
+
 }
 
 

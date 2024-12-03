@@ -48,6 +48,8 @@ private:
     int resolution;
     float aspect_ratio;
     float ascii_scale;
+    bool use_custom_font = false;
+    ImFont *im_default_font = nullptr;
     AsciiFont ascii_font;
     ToolFont tool_font;
   };
@@ -104,7 +106,9 @@ private:
 
   void load_tool_font();
   void load_ascii_fonts();
+  void load_fonts();
   void remove_ascii_fonts();
+  
 
 public:
   GUI();
