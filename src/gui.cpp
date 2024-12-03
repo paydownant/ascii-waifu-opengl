@@ -192,8 +192,10 @@ void GUI :: process_input() {
   }
   
   if (pend_update_buffer) {
-    update_resolution();
-    aui->createVertexBuffer(draw_properties.resolution, draw_properties.aspect_ratio);
+    if (aui->is_base_img_loaded()) {
+      update_resolution();
+      aui->createVertexBuffer(draw_properties.resolution, draw_properties.aspect_ratio);
+    } 
   }
 }
 
@@ -286,7 +288,6 @@ void GUI :: load_tool_font() {
 }
 
 void GUI :: load_ascii_fonts() {
-
   uint i = 0;
   for (auto size : font_pixels.sizes) {
     ImFont *new_ascii_font = font_atlas->AddFontFromFileTTF(ascii_font_path, size, font_config, font_atlas->GetGlyphRangesDefault());
@@ -303,7 +304,6 @@ void GUI :: load_ascii_fonts() {
   draw_properties.use_custom_font = true;
 
 }
-
 
 void GUI :: load_fonts() {
   if (!draw_properties.tool_font.font && !draw_properties.ascii_font.font) {

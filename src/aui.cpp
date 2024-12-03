@@ -72,7 +72,7 @@ ascii_data* AUI :: getAsciiBuffer(auchar *points, auint n_points) {
 bool AUI :: createVertexBuffer(auint target_width_px, float aspect_ratio) {
   // Load Image
 
-  if (!img_data) {
+  if (!is_base_img_loaded()) {
     fprintf(stderr, "No img_data found\n");
     return false;
   }
