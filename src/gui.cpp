@@ -4,6 +4,7 @@
 
 #include "gui.h"
 #include "gui_widgets.h"
+#include "gui_helper.h"
 
 GUI :: GUI() {
   glsl_version = strdup("#version 130");
@@ -27,7 +28,7 @@ GUI :: GUI() {
 
   tool_font_path = strdup("../fonts/OpenSans/OpenSans-VariableFont_wdth,wght.ttf");
   ascii_font_path = strdup("../fonts/Technology/Technology.ttf");
-  //ascii_font_path = strdup("../fonts/");
+  //ascii_font_path = strdup("../fonts/ascii.ttf");
 
   ascii_set = strdup("O");
   
@@ -231,7 +232,7 @@ void GUI :: draw_ascii() {
 
   if (!aui->is_base_img_loaded()) {
     return;
-  }  
+  }
 
   ascii_data_t* data = aui->getAsciiBuffer(ascii_set, strlen(ascii_set));
   for (auint i = 0; i < data->height; ++i) {
@@ -285,7 +286,6 @@ void GUI :: load_tool_font() {
 }
 
 void GUI :: load_ascii_fonts() {
-  font_pixels.name = ascii_font_path;
 
   uint i = 0;
   for (auto size : font_pixels.sizes) {
@@ -299,39 +299,48 @@ void GUI :: load_ascii_fonts() {
     fprintf(stderr, "Font Load Error: Unmatched Font Number\n");
     return;
   }
-
+  font_pixels.name = ascii_font_path;
   draw_properties.use_custom_font = true;
 
 }
 
+
 void GUI :: load_fonts() {
-
-  bool initial_call = false;
-  if (draw_properties.tool_font.font == nullptr) initial_call = true;
-
-  // Check if Font Paths Exists and Loads Fonts
-  if (tool_font_path && ascii_font_path) {
-    if (!initial_call) {
-      font_pixels.fonts.clear();
-      font_atlas->Clear();
-    }
+  if (!draw_properties.tool_font.font && !draw_properties.ascii_font.font) {
+    // Initial Load
     draw_properties.im_default_font = font_atlas->AddFontDefault();
-    load_tool_font();
-    load_ascii_fonts();
 
-    if (initial_call) {
-      // setting the custom font default values
-      draw_properties.ascii_font.font = font_pixels.fonts[3];
-      draw_properties.ascii_font.size = font_pixels.sizes[3];
-      draw_properties.ascii_font.size_slider = font_pixels.sizes[3];
+    if (is_file_ttf(tool_font_path)) {
+      load_tool_font();
+    } else {
+      draw_properties.tool_font.font = draw_properties.im_default_font;
+    }
+
+    if (is_file_ttf(ascii_font_path)) {
+      load_ascii_fonts();
+      draw_properties.ascii_font.font = font_pixels.fonts[draw_properties.default_font_set_index];
+      draw_properties.ascii_font.size = font_pixels.sizes[draw_properties.default_font_set_index];
+      draw_properties.ascii_font.size_slider = font_pixels.sizes[draw_properties.default_font_set_index];
+    } else {
+      draw_properties.ascii_font.font = draw_properties.im_default_font;
     }
 
   } else {
-    if (initial_call) {
-      // In initialisation, if it fails to find fonts, load default gui font
+    // Update Load
+    if (is_file_ttf(tool_font_path) && is_file_ttf(ascii_font_path)) {
+      font_pixels.fonts.clear();
+      font_atlas->Clear();
+      draw_properties.im_default_font = font_atlas->AddFontDefault();
+      load_tool_font();
+      load_ascii_fonts();
+    } else if (is_file_ttf(tool_font_path) || !is_file_ttf(ascii_font_path)) {
+      return;
+    } else if (is_file_ttf(ascii_font_path)) {
+      font_pixels.fonts.clear();
+      font_atlas->Clear();
       draw_properties.im_default_font = font_atlas->AddFontDefault();
       draw_properties.tool_font.font = draw_properties.im_default_font;
-      draw_properties.ascii_font.font = draw_properties.im_default_font;
+      load_ascii_fonts();
     } else {
       return;
     }
@@ -340,10 +349,4 @@ void GUI :: load_fonts() {
   font_atlas->Build();
   ImGui_ImplOpenGL3_DestroyFontsTexture();
   ImGui_ImplOpenGL3_CreateFontsTexture();
-
-}
-
-
-static void glfw_error_callback(int error, const char* description) {
-  fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }

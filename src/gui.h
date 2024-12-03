@@ -52,6 +52,7 @@ private:
     ImFont *im_default_font = nullptr;
     AsciiFont ascii_font;
     ToolFont tool_font;
+    int default_font_set_index = 7;
   };
 
   struct Widgets {
