@@ -3,6 +3,9 @@
 
 #define GL_SILENCE_DEPRECATION
 
+#include <stdio.h>
+#include <stdlib.h>
+
 #include <vector>
 
 #include "imgui.h"
@@ -50,14 +53,14 @@ private:
   };
 
   struct DrawBoundary {
-    uint x_min = 0;
-    uint x_max = 0;
-    uint y_min = 0;
-    uint y_max = 0;
+    unsigned int x_min = 0;
+    unsigned int x_max = 0;
+    unsigned int y_min = 0;
+    unsigned int y_max = 0;
   };
 
   struct DrawProperties {
-    uint resolution;
+    unsigned int resolution;
     float aspect_ratio;
     float ascii_scale;
     WindowFont window_font;

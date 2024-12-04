@@ -1,5 +1,4 @@
 
-#include <stdio.h>
 #include <GLFW/glfw3.h>
 
 #include "gui.h"
@@ -267,8 +266,8 @@ void GUI :: bounds_window() {
   ImGuiWindowFlags_NoResize           | ImGuiWindowFlags_NoMove                | ImGuiWindowFlags_NoSavedSettings | 
   ImGuiWindowFlags_NoScrollbar        | ImGuiWindowFlags_NoDecoration          | ImGuiWindowFlags_NoNav;
 
-  uint boundary_size_w = display_w * (1 - draw_properties.tool_window_ratio) - draw_properties.boundary.x_min;
-  uint boundary_size_h = display_h - draw_properties.boundary.y_min;
+  unsigned int boundary_size_w = display_w * (1 - draw_properties.tool_window_ratio) - draw_properties.boundary.x_min;
+  unsigned int boundary_size_h = display_h - draw_properties.boundary.y_min;
 
   ImGui::SetNextWindowPos(ImVec2(draw_properties.boundary.x_min, draw_properties.boundary.y_min));
   ImGui::SetNextWindowSize(ImVec2(boundary_size_w, boundary_size_h));
@@ -286,15 +285,15 @@ void GUI :: draw_ascii() {
     return;
   }
 
-  ascii_data_t* data = aui->getAsciiBuffer(draw_properties.ascii_set, (auint)strlen(draw_properties.ascii_set));
+  ascii_data_t* data = aui->getAsciiBuffer(draw_properties.ascii_set, (unsigned int)strlen(draw_properties.ascii_set));
   if (data == nullptr) {
     return;
   }
   ImGui::PushFont(draw_properties.ascii_font.font);
   ImVec2 tex_size = ImGui::CalcTextSize("O");
   float font_w = tex_size.x, font_h = tex_size.y;
-  for (auint y = 0; y < data->height; ++y) {
-    for (auint x = 0; x < data->width; ++x) {
+  for (unsigned int y = 0; y < data->height; ++y) {
+    for (unsigned int x = 0; x < data->width; ++x) {
       float r_level, g_level, b_level;
       r_level = data->colour_strip[y * data->width + x].x;
       g_level = data->colour_strip[y * data->width + x].y;
@@ -324,8 +323,8 @@ void GUI :: draw_ascii() {
   free(data->colour_strip);
   free(data);
   
-  uint drawable_max_x = display_w * (1 - draw_properties.tool_window_ratio);
-  uint drawable_max_y = display_h;
+  unsigned int drawable_max_x = display_w * (1 - draw_properties.tool_window_ratio);
+  unsigned int drawable_max_y = display_h;
   // Check for Out of Bounds
   if (draw_properties.boundary.x_max > drawable_max_x || draw_properties.boundary.y_max > drawable_max_y) {
     widgets.shape_bounds = true;
@@ -360,7 +359,7 @@ void GUI :: load_window_font() {
 }
 
 void GUI :: load_ascii_fonts() {
-  uint i = 0;
+  unsigned int i = 0;
   for (auto size : font_pixels.sizes) {
     ImFont *new_ascii_font = font_atlas->AddFontFromMemoryCompressedTTF(unifont_compressed_data, unifont_compressed_size, size, font_config, font_atlas->GetGlyphRangesDefault());
     new_ascii_font->FontSize = size;
@@ -375,7 +374,7 @@ void GUI :: load_ascii_fonts() {
 }
 
 void GUI :: load_custom_ascii_fonts() {
-  uint i = 0;
+  unsigned int i = 0;
   for (auto size : font_pixels.sizes) {
     ImFont *new_ascii_font = font_atlas->AddFontFromFileTTF(custom_font_path, size, font_config, font_atlas->GetGlyphRangesDefault());
     new_ascii_font->FontSize = size;
@@ -421,11 +420,11 @@ void GUI :: export_img() {
     return;
   }
 
-  uint channels = 4;
-  uint image_size_w = draw_properties.boundary.x_max - draw_properties.boundary.x_min;
-  uint image_size_h = draw_properties.boundary.y_max - draw_properties.boundary.y_min;
+  unsigned int channels = 4;
+  unsigned int image_size_w = draw_properties.boundary.x_max - draw_properties.boundary.x_min;
+  unsigned int image_size_h = draw_properties.boundary.y_max - draw_properties.boundary.y_min;
 
-  uint *buffer = new uint[image_size_w * image_size_h * channels];
+  unsigned int *buffer = new unsigned int[image_size_w * image_size_h * channels];
   if (buffer == nullptr) {
     fprintf(stderr, "Failed to Create Export Buffer\n");
     return;

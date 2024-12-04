@@ -1,17 +1,15 @@
 #ifndef AUI_H
 #define AUI_H
 
+#include <string>
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-
-#include <string>
-
 #include "imagesource.h"
 
 static void error_callback(int error, const char *desc);
 
-typedef unsigned int auint;
 typedef char auchar;
 
 struct AuVec3 {
@@ -50,8 +48,8 @@ struct AuVec3 {
 };
 
 typedef struct ascii_data {
-  auint width = 0;
-  auint height = 0;
+  unsigned int width = 0;
+  unsigned int height = 0;
   char *char_strip = nullptr;
   AuVec3 *colour_strip = nullptr;
 } ascii_data_t;
@@ -65,7 +63,7 @@ class AUI {
 private:
 
   Image *img_data = nullptr;
-  auint width, height;
+  unsigned int width, height;
   vertex_t *vertices = nullptr;
 
   const char const_points[8] = {' ','.',':','!','i','l','w','W'};
@@ -74,9 +72,9 @@ private:
 public:
   AUI();
   ~AUI();
-  ascii_data* getAsciiBuffer(auchar *points, auint n_points);
+  ascii_data* getAsciiBuffer(auchar *points, unsigned int n_points);
   
-  bool createVertexBuffer(u_int target_width_px, float aspect_ratio);
+  bool createVertexBuffer(unsigned int target_width_px, float aspect_ratio);
   void clean_vertex_buffer();
 
   bool load_base_image(std::string image_path);

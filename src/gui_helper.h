@@ -38,7 +38,7 @@ bool is_file_ttf(const char *file_path) {
   return ttf;
 }
 
-bool export_buffer_to_img(const uint width, const uint height, const uint channels, const uint *buffer, const char *image_path) {
+bool export_buffer_to_img(const unsigned int width, const unsigned int height, const unsigned int channels, const unsigned int *buffer, const char *image_path) {
   if (width * height <= 0 || buffer == nullptr || image_path == nullptr) {
     return false;
   }
@@ -51,12 +51,12 @@ bool export_buffer_to_img(const uint width, const uint height, const uint channe
   }
 
   // Copy the pixel data from buffer to data, flipping vertically
-  for (uint y = 0; y < height; ++y) {
-    uint flipped_y = height - 1 - y; // Reverse the row order
-    for (uint x = 0; x < width; ++x) {
-      for (uint channel = 0; channel < channels; ++channel) {
-        uint src_index = (flipped_y * width + x) * channels + channel; // Source index (flipped)
-        uint dest_index = (y * width + x) * channels + channel;        // Destination index
+  for (unsigned int y = 0; y < height; ++y) {
+    unsigned int flipped_y = height - 1 - y; // Reverse the row order
+    for (unsigned int x = 0; x < width; ++x) {
+      for (unsigned int channel = 0; channel < channels; ++channel) {
+        unsigned int src_index = (flipped_y * width + x) * channels + channel; // Source index (flipped)
+        unsigned int dest_index = (y * width + x) * channels + channel;        // Destination index
         export_image->data[dest_index] = buffer[src_index];
       }
     }

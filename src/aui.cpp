@@ -1,7 +1,5 @@
 #include "aui.h"
 
-#include <assert.h>
-
 #include <stdexcept>
 
 AUI :: AUI() {
@@ -15,17 +13,17 @@ AUI :: ~AUI() {
 
 
 void AUI :: drawAUI(FILE *output_ptr) {
-  for (auint i = 0; i < height; ++i) {
-    for (auint j = 0; j < width; ++j) {
+  for (unsigned int i = 0; i < height; ++i) {
+    for (unsigned int j = 0; j < width; ++j) {
       float bw_level = 0.2126 * vertices[i * width + j].level.x + 0.7152 * vertices[i * width + j].level.y + 0.0722 * vertices[i * width + j].level.z;
-      auint points_index = (auint)(pow(bw_level, 1.2) * 8);
+      unsigned int points_index = (unsigned int)(pow(bw_level, 1.2) * 8);
       fprintf(output_ptr, "%c", const_points[points_index]);
     }
     fprintf(output_ptr, "\n");
   }
 }
 
-ascii_data* AUI :: getAsciiBuffer(auchar *points, auint n_points) {
+ascii_data* AUI :: getAsciiBuffer(auchar *points, unsigned int n_points) {
 
   ascii_data_t *data = (ascii_data_t*)malloc(sizeof(data));
   if (data == NULL) {
@@ -46,8 +44,8 @@ ascii_data* AUI :: getAsciiBuffer(auchar *points, auint n_points) {
     return NULL;
   }
 
-  for (auint i = 0; i < height; ++i) {
-    for (auint j = 0; j < width; ++j) {
+  for (unsigned int i = 0; i < height; ++i) {
+    for (unsigned int j = 0; j < width; ++j) {
       float r_level, g_level, b_level;
       r_level = vertices[i * width + j].level.x;
       g_level = vertices[i * width + j].level.y;
@@ -56,7 +54,7 @@ ascii_data* AUI :: getAsciiBuffer(auchar *points, auint n_points) {
       float bw_level = 0.2126 * r_level + 0.7152 * g_level + 0.0722 * b_level;
       float threshold = 0.01;
 
-      auint point_index = (auint)(pow(bw_level, 1.2) * n_points);
+      unsigned int point_index = (unsigned int)(pow(bw_level, 1.2) * n_points);
       
       if (bw_level > threshold) {
         data->char_strip[i * width + j] = points[point_index];
@@ -73,7 +71,7 @@ ascii_data* AUI :: getAsciiBuffer(auchar *points, auint n_points) {
   return data;
 }
 
-bool AUI :: createVertexBuffer(auint target_width_px, float aspect_ratio) {
+bool AUI :: createVertexBuffer(unsigned int target_width_px, float aspect_ratio) {
   // Load Image
 
   if (!is_base_img_loaded()) {
@@ -84,8 +82,8 @@ bool AUI :: createVertexBuffer(auint target_width_px, float aspect_ratio) {
   float ratio_width = (float)target_width_px / img_data->w;
   float ratio_height = ratio_width * aspect_ratio;
 
-  auint target_width = (auint)(ratio_width * img_data->w);
-  auint target_height = (auint)(ratio_height * img_data->h);
+  unsigned int target_width = (unsigned int)(ratio_width * img_data->w);
+  unsigned int target_height = (unsigned int)(ratio_height * img_data->h);
 
   if (target_width < 1) target_width = 1;
   if (target_height < 1) target_height = 1;
@@ -101,11 +99,11 @@ bool AUI :: createVertexBuffer(auint target_width_px, float aspect_ratio) {
     return false;
   }
 
-  for (auint i = 0; i < target_height; ++i) {
-    for (auint j = 0; j < target_width; ++j) {
-      auint index = i * target_width + j;
-      auint dataIndexChunk = (auint)((float)i / ratio_height) * img_data->w * 4 + (auint)((float)j * 4 / ratio_width);
-      auint dataIndex = dataIndexChunk - dataIndexChunk % 4;
+  for (unsigned int i = 0; i < target_height; ++i) {
+    for (unsigned int j = 0; j < target_width; ++j) {
+      unsigned int index = i * target_width + j;
+      unsigned int dataIndexChunk = (unsigned int)((float)i / ratio_height) * img_data->w * 4 + (unsigned int)((float)j * 4 / ratio_width);
+      unsigned int dataIndex = dataIndexChunk - dataIndexChunk % 4;
       float r_level, b_level, g_level, alpha_level;
       r_level = (float)img_data->data[dataIndex + 0] / 256;
       g_level = (float)img_data->data[dataIndex + 1] / 256;
