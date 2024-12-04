@@ -48,10 +48,11 @@ private:
     int resolution;
     float aspect_ratio;
     float ascii_scale;
-    bool use_custom_font = false;
     ImFont *im_default_font = nullptr;
+    auchar *ascii_set = nullptr;
     AsciiFont ascii_font;
     ToolFont tool_font;
+    bool use_custom_font = false;
     int default_font_set_index = 7;
   };
 
@@ -65,7 +66,6 @@ private:
   };
 
   struct FontPixels {
-    char *name = nullptr;
     std::vector<ImFont *> fonts;
     std::vector<int> sizes = {6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40};
   };
@@ -86,7 +86,7 @@ private:
   char *ascii_font_path = nullptr;
   char *tool_font_path = nullptr;
 
-  auchar *ascii_set = nullptr;
+  
 
   DrawProperties draw_properties;
   Widgets widgets;
@@ -108,7 +108,8 @@ private:
   void load_tool_font();
   void load_ascii_fonts();
   void load_fonts();
-  void remove_ascii_fonts();
+
+  void clean_gui_mem();
   
 
 public:

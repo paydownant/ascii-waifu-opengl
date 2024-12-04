@@ -30,7 +30,7 @@ GUI :: GUI() {
   ascii_font_path = strdup("../fonts/Technology/Technology.ttf");
   //ascii_font_path = strdup("../fonts/ascii.ttf");
 
-  ascii_set = strdup("O");
+  draw_properties.ascii_set = strdup("O");
   
   draw_properties.aspect_ratio = 0.4f;
 
@@ -49,17 +49,11 @@ GUI :: ~GUI() {
   glfwDestroyWindow(window);
   glfwTerminate();
 
-  free(ascii_set);
-  free(ascii_font_path);
-  free(tool_font_path);
-  free(aui_path);
-  free(window_title);
-  free(glsl_version);
+  clean_gui_mem();
   
 }
 
 void GUI :: run() {
-  
   window = glfwCreateWindow(window_width, window_height, window_title, nullptr, nullptr);
   if (window == nullptr) {
     return;
@@ -134,13 +128,11 @@ void GUI :: run() {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-
     // Body
     ascii_window(&w_open_ascii);
     tool_window(&w_open_tool);
 
     // Body End
-
 
     // Rendering
     ImGui::Render();
@@ -154,7 +146,6 @@ void GUI :: run() {
     glfwSwapBuffers(window);
 
   }
-
 }
 
 void GUI :: process_input() {
@@ -223,7 +214,7 @@ void GUI :: tool_window(bool is_open) {
   widgets.slider_scale = gui_slider_float(*this, "Scale", &draw_properties.ascii_scale, 0.1, 5.0);
   widgets.slider_aspect_ratio = gui_slider_float(*this, "Aspect Ratio", &draw_properties.aspect_ratio, 0.1, 0.9);
   widgets.slider_font_size = gui_slider_int(*this, "Font Size", &draw_properties.ascii_font.size_slider, font_pixels.sizes.front(), font_pixels.sizes.back());
-  widgets.input_ascii_char = gui_text_input(*this, "Ascii Set", &ascii_set);
+  widgets.input_ascii_char = gui_text_input(*this, "Ascii Set", &draw_properties.ascii_set);
   widgets.button_load_ascii_font = gui_path_load_button(*this, "Font Path", &ascii_font_path);
 
   ImGui::End();
@@ -236,7 +227,7 @@ void GUI :: draw_ascii() {
     return;
   }
 
-  ascii_data_t* data = aui->getAsciiBuffer(ascii_set, strlen(ascii_set));
+  ascii_data_t* data = aui->getAsciiBuffer(draw_properties.ascii_set, strlen(draw_properties.ascii_set));
   for (auint i = 0; i < data->height; ++i) {
     for (auint j = 0; j < data->width; ++j) {
       float r_level, g_level, b_level;
@@ -300,7 +291,6 @@ void GUI :: load_ascii_fonts() {
     fprintf(stderr, "Font Load Error: Unmatched Font Number\n");
     return;
   }
-  font_pixels.name = ascii_font_path;
   draw_properties.use_custom_font = true;
 
 }
@@ -349,4 +339,24 @@ void GUI :: load_fonts() {
   font_atlas->Build();
   ImGui_ImplOpenGL3_DestroyFontsTexture();
   ImGui_ImplOpenGL3_CreateFontsTexture();
+}
+
+void GUI :: clean_gui_mem() {
+  // draw_properties
+  free(draw_properties.ascii_set);
+  free(draw_properties.tool_font.font);
+  free(draw_properties.ascii_font.font);
+
+  // gui stuff
+  free(ascii_font_path);
+  free(tool_font_path);
+  free(aui_path);
+  free(window_title);
+  free(glsl_version);
+
+  // font pixels stuff
+  font_pixels.fonts.clear();
+
+  // font atlas
+  font_atlas->Clear();
 }
