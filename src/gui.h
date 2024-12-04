@@ -32,20 +32,20 @@ private:
     LIGHT
   };
 
+  struct WindowFont {
+    ImFont *font = nullptr;
+    int size = 25;
+  };
+
   struct AsciiFont {
     ImFont *font = nullptr;
     int size = 20;
     int size_slider;
   };
 
-  struct ToolFont {
-    ImFont *font = nullptr;
-    int size = 25;
-  };
-
   struct Default {
     const float ascii_scale = 2.0f;
-    const float aspect_ratio = 0.4f;
+    const float aspect_ratio = 0.5f;
     const int font_set_index = 7;
   };
 
@@ -60,11 +60,10 @@ private:
     uint resolution;
     float aspect_ratio;
     float ascii_scale;
-    ImFont *im_default_font = nullptr;
+    WindowFont window_font;
     auchar *ascii_set = nullptr;
     AsciiFont ascii_font;
-    ToolFont tool_font;
-    bool use_custom_font = false;
+    bool font_loaded = false;
     Default default_val;
     DrawBoundary boundary;
     float tool_window_ratio;
@@ -79,7 +78,7 @@ private:
     bool slider_font_size = false;
     bool button_reset_font_size = false;
     bool input_ascii_char = false;
-    bool button_load_ascii_font = false;
+    bool button_load_custom_font = false;
     bool button_export_img = false;
 
     bool shape_bounds = false;
@@ -103,8 +102,7 @@ private:
 
   char *output_path = nullptr;
 
-  char *ascii_font_path = nullptr;
-  char *tool_font_path = nullptr;
+  char *custom_font_path = nullptr;
 
   DrawProperties draw_properties;
   Widgets widgets;
@@ -123,8 +121,9 @@ private:
   void update_resolution();
   void update_font_size();
 
-  void load_tool_font();
+  void load_window_font();
   void load_ascii_fonts();
+  void load_custom_ascii_fonts();
   void load_fonts();
   void refresh_fonts();
   void export_img();

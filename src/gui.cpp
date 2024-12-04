@@ -6,6 +6,8 @@
 #include "gui_widgets.h"
 #include "gui_helper.h"
 
+#include "font_bin_compressed.h"
+
 GUI :: GUI() {
   glsl_version = strdup("#version 130");
 
@@ -27,9 +29,7 @@ GUI :: GUI() {
 
   aui_path = strdup("../images/");
 
-  tool_font_path = strdup("../fonts/OpenSans/OpenSans-VariableFont_wdth,wght.ttf");
-  ascii_font_path = strdup("../fonts/Technology/Technology.ttf");
-  //ascii_font_path = strdup("../fonts/ascii.ttf");
+  custom_font_path = strdup("font.ttf");
 
   draw_properties.ascii_set = strdup("O");
   draw_properties.ascii_scale = draw_properties.default_val.ascii_scale;
@@ -190,7 +190,7 @@ void GUI :: process_input() {
     pend_update_buffer = true;
   }
 
-  if (widgets.button_load_ascii_font) {
+  if (widgets.button_load_custom_font) {
     // update font
     pend_update_buffer = true;
     load_fonts();
@@ -233,7 +233,7 @@ void GUI :: tool_window() {
   ImGui::SetNextWindowSize(ImVec2(display_w * draw_properties.tool_window_ratio, display_h));
   ImGui::SetNextWindowBgAlpha(0.8);
 
-  ImGui::PushFont(draw_properties.tool_font.font);
+  ImGui::PushFont(draw_properties.window_font.font);
   ImGui::Begin("Tools", NULL, flags);
   
   widgets.button_load_base_image = gui_path_load_button(*this, "Image Path", &aui_path);
@@ -249,7 +249,7 @@ void GUI :: tool_window() {
 
   widgets.input_ascii_char = gui_text_input(*this, "Ascii Set", &draw_properties.ascii_set);
   
-  widgets.button_load_ascii_font = gui_path_load_button(*this, "Font Path", &ascii_font_path);
+  widgets.button_load_custom_font = gui_path_load_button(*this, "Font Path", &custom_font_path);
 
   widgets.button_export_img = gui_export_img_button(*this, "Export Window as Image", &output_path);
 
@@ -292,7 +292,7 @@ void GUI :: draw_ascii() {
   }
   ImGui::PushFont(draw_properties.ascii_font.font);
   ImVec2 tex_size = ImGui::CalcTextSize("O");
-  float font_w = tex_size.x, font_h = tex_size.y + 4;
+  float font_w = tex_size.x, font_h = tex_size.y;
   for (auint y = 0; y < data->height; ++y) {
     for (auint x = 0; x < data->width; ++x) {
       float r_level, g_level, b_level;
@@ -302,6 +302,7 @@ void GUI :: draw_ascii() {
       
       ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(r_level, g_level, b_level, 1.0f));
       ImGui::SetCursorPosX(font_w * x);
+      ImGui::SetCursorPosY(font_h * y);
       ImGui::Text("%c", data->char_strip[y * data->width + x]);
       
       ImGui::PopStyleColor();
@@ -314,7 +315,7 @@ void GUI :: draw_ascii() {
   
   // Calculating Drawing Boundary
   draw_properties.boundary.x_min = 0;
-  draw_properties.boundary.y_min = 4;
+  draw_properties.boundary.y_min = 0;
 
   draw_properties.boundary.x_max = font_w * data->width + draw_properties.boundary.x_min;
   draw_properties.boundary.y_max = font_h * data->height + draw_properties.boundary.y_min;
@@ -341,11 +342,6 @@ void GUI :: update_resolution() {
 }
 
 void GUI :: update_font_size() {
-  if (!draw_properties.use_custom_font) {
-    draw_properties.ascii_font.size_slider = draw_properties.ascii_font.size;
-    return;
-  }
-  
   int fp = 0;
   for (auto size : font_pixels.sizes) {
     if (size == draw_properties.ascii_font.size_slider) {
@@ -359,14 +355,14 @@ void GUI :: update_font_size() {
   
 }
 
-void GUI :: load_tool_font() {
-  draw_properties.tool_font.font = font_atlas->AddFontFromFileTTF(tool_font_path, draw_properties.tool_font.size, font_config, font_atlas->GetGlyphRangesDefault());
+void GUI :: load_window_font() {
+  draw_properties.window_font.font = font_atlas->AddFontFromMemoryCompressedTTF(opensans_compressed_data, opensans_compressed_size, draw_properties.window_font.size, font_config, font_atlas->GetGlyphRangesDefault());
 }
 
 void GUI :: load_ascii_fonts() {
   uint i = 0;
   for (auto size : font_pixels.sizes) {
-    ImFont *new_ascii_font = font_atlas->AddFontFromFileTTF(ascii_font_path, size, font_config, font_atlas->GetGlyphRangesDefault());
+    ImFont *new_ascii_font = font_atlas->AddFontFromMemoryCompressedTTF(unifont_compressed_data, unifont_compressed_size, size, font_config, font_atlas->GetGlyphRangesDefault());
     new_ascii_font->FontSize = size;
     font_pixels.fonts.push_back(new_ascii_font);
     i++;
@@ -376,42 +372,38 @@ void GUI :: load_ascii_fonts() {
     fprintf(stderr, "Font Load Error: Unmatched Font Number\n");
     return;
   }
-  draw_properties.use_custom_font = true;
+}
 
+void GUI :: load_custom_ascii_fonts() {
+  uint i = 0;
+  for (auto size : font_pixels.sizes) {
+    ImFont *new_ascii_font = font_atlas->AddFontFromFileTTF(custom_font_path, size, font_config, font_atlas->GetGlyphRangesDefault());
+    new_ascii_font->FontSize = size;
+    font_pixels.fonts.push_back(new_ascii_font);
+    i++;
+  }
+
+  if (font_pixels.fonts.size() != font_pixels.sizes.size()) {
+    fprintf(stderr, "Font Load Error: Unmatched Font Number\n");
+    return;
+  }
+  draw_properties.font_loaded = true;
 }
 
 void GUI :: load_fonts() {
-  if (!draw_properties.tool_font.font && !draw_properties.ascii_font.font) {
-    // Initial Load
-    draw_properties.im_default_font = font_atlas->AddFontDefault();
-
-    if (is_file_ttf(tool_font_path)) {
-      load_tool_font();
-    } else {
-      draw_properties.tool_font.font = draw_properties.im_default_font;
-    }
-
-    if (is_file_ttf(ascii_font_path)) {
-      load_ascii_fonts();
-      draw_properties.ascii_font.font = font_pixels.fonts[draw_properties.default_val.font_set_index];
-      draw_properties.ascii_font.size = font_pixels.sizes[draw_properties.default_val.font_set_index];
-      draw_properties.ascii_font.size_slider = font_pixels.sizes[draw_properties.default_val.font_set_index];
-    } else {
-      draw_properties.ascii_font.font = draw_properties.im_default_font;
-    }
-
+  if (!draw_properties.font_loaded) {
+    load_window_font();
+    load_ascii_fonts();
+    draw_properties.ascii_font.font = font_pixels.fonts[draw_properties.default_val.font_set_index];
+    draw_properties.ascii_font.size = font_pixels.sizes[draw_properties.default_val.font_set_index];
+    draw_properties.ascii_font.size_slider = font_pixels.sizes[draw_properties.default_val.font_set_index];
+    draw_properties.font_loaded = true;
   } else {
-    // Update Load
-    if (is_file_ttf(tool_font_path) && is_file_ttf(ascii_font_path)) {
-      refresh_fonts();
-      load_tool_font();
-      load_ascii_fonts();
-    } else if (is_file_ttf(tool_font_path) || !is_file_ttf(ascii_font_path)) {
-      return;
-    } else if (is_file_ttf(ascii_font_path)) {
-      refresh_fonts();
-      draw_properties.tool_font.font = draw_properties.im_default_font;
-      load_ascii_fonts();
+    if (is_file_ttf(custom_font_path)) {
+      font_pixels.fonts.clear();
+      font_atlas->Clear();
+      load_window_font();
+      load_custom_ascii_fonts();
     } else {
       return;
     }
@@ -420,12 +412,6 @@ void GUI :: load_fonts() {
   font_atlas->Build();
   ImGui_ImplOpenGL3_DestroyFontsTexture();
   ImGui_ImplOpenGL3_CreateFontsTexture();
-}
-
-void GUI :: refresh_fonts() {
-  font_pixels.fonts.clear();
-  font_atlas->Clear();
-  draw_properties.im_default_font = font_atlas->AddFontDefault();
 }
 
 void GUI :: export_img() {
@@ -459,16 +445,13 @@ void GUI :: clean_gui_mem() {
 
   // gui stuff
   free(aui_path);
-  free(ascii_font_path);
-  free(tool_font_path);
+  free(custom_font_path);
   free(output_path);
   free(window_title);
   free(glsl_version);
 
   // font pixels stuff
-  if (draw_properties.use_custom_font) {
-    font_pixels.fonts.clear();
-  }
+  font_pixels.fonts.clear();
 
   // font atlas
   font_atlas->Clear();
