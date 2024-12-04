@@ -27,7 +27,7 @@ GUI :: GUI() {
 
   bg_colour = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
 
-  aui_path = strdup("../images/");
+  aui_path = strdup("image.png");
 
   custom_font_path = strdup("font.ttf");
 
@@ -249,7 +249,7 @@ void GUI :: tool_window() {
 
   widgets.input_ascii_char = gui_text_input(*this, "Ascii Set", &draw_properties.ascii_set);
   
-  widgets.button_load_custom_font = gui_path_load_button(*this, "Font Path", &custom_font_path);
+  widgets.button_load_custom_font = gui_path_load_button(*this, "Custom Font Path", &custom_font_path);
 
   widgets.button_export_img = gui_export_img_button(*this, "Export Window as Image", &output_path);
 
