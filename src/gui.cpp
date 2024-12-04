@@ -22,6 +22,7 @@ GUI :: GUI() {
 
   window_title = strdup("AsciiWaifu");
   window_style = DARK;
+
   bg_colour = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
 
   aui_path = strdup("../images/");
@@ -31,12 +32,10 @@ GUI :: GUI() {
   //ascii_font_path = strdup("../fonts/ascii.ttf");
 
   draw_properties.ascii_set = strdup("O");
-
 }
 
 GUI :: ~GUI() {
   printf("Terminating GUI\n");
-
   // Clean up
   delete(aui);
 
@@ -155,7 +154,6 @@ void GUI :: process_input() {
   if (widgets.button_load_base_image) {
     pend_update_buffer = true;
     aui->load_base_image(aui_path);
-    
   }
 
   if (widgets.slider_scale || widgets.slider_aspect_ratio) {
@@ -341,17 +339,13 @@ void GUI :: load_fonts() {
   } else {
     // Update Load
     if (is_file_ttf(tool_font_path) && is_file_ttf(ascii_font_path)) {
-      font_pixels.fonts.clear();
-      font_atlas->Clear();
-      draw_properties.im_default_font = font_atlas->AddFontDefault();
+      refresh_fonts();
       load_tool_font();
       load_ascii_fonts();
     } else if (is_file_ttf(tool_font_path) || !is_file_ttf(ascii_font_path)) {
       return;
     } else if (is_file_ttf(ascii_font_path)) {
-      font_pixels.fonts.clear();
-      font_atlas->Clear();
-      draw_properties.im_default_font = font_atlas->AddFontDefault();
+      refresh_fonts();
       draw_properties.tool_font.font = draw_properties.im_default_font;
       load_ascii_fonts();
     } else {
@@ -364,10 +358,15 @@ void GUI :: load_fonts() {
   ImGui_ImplOpenGL3_CreateFontsTexture();
 }
 
+void GUI :: refresh_fonts() {
+  font_pixels.fonts.clear();
+  font_atlas->Clear();
+  draw_properties.im_default_font = font_atlas->AddFontDefault();
+}
+
 void GUI :: clean_gui_mem() {
   // draw_properties
   free(draw_properties.ascii_set);
-  free(draw_properties.tool_font.font);
 
   // gui stuff
   free(ascii_font_path);

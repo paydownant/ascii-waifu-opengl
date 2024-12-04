@@ -3,13 +3,13 @@
 
 #define GL_SILENCE_DEPRECATION
 
+#include <vector>
+
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
 
 #include "aui.h"
-
-#include <vector>
 
 // [Win32] Our example includes a copy of glfw3.lib pre-compiled with VS2010 to maximize ease of testing and compatibility with old VS compilers.
 // To link with VS2010-era libraries, VS2015+ requires linking with legacy_stdio_definitions.lib, which we do using this pragma.
@@ -22,7 +22,6 @@
 #ifdef __EMSCRIPTEN__
 #include "../libs/emscripten/emscripten_mainloop_stub.h"
 #endif
-
 
 class GUI {
 
@@ -118,6 +117,7 @@ private:
   void load_tool_font();
   void load_ascii_fonts();
   void load_fonts();
+  void refresh_fonts();
 
   void clean_gui_mem();
   
