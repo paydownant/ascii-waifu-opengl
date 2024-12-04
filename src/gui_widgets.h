@@ -9,7 +9,7 @@ bool gui_path_load_button(GUI &gui, const char *label, char **path) {
   snprintf(new_label, 11 + strlen(label), "##INPUT_TEXT%s", label);
   ImGui::InputText(new_label, *path, 256);
   ImGui::SameLine();
-  snprintf(new_label, 7 + strlen(label), "LOAD##%s", label);
+  snprintf(new_label, 7 + strlen(label), "Load##%s", label);
   bool pressed = ImGui::Button(new_label);
   free(new_label);
   return pressed;
@@ -42,21 +42,27 @@ bool gui_slider_float(GUI &gui, const char *label, float *value, float min, floa
 }
 
 bool gui_reset_button(GUI &gui, const char *label) {
-  bool pressed = false;
   char *new_label = (char*)malloc(sizeof(char) * (8 + strlen(label)));
-  snprintf(new_label, 8 + strlen(label), "RESET##%s", label);
-  pressed = ImGui::Button(new_label);
+  snprintf(new_label, 8 + strlen(label), "Reset##%s", label);
+  bool pressed = ImGui::Button(new_label);
   free(new_label);
   return pressed;
 }
 
 bool gui_reset_button_sameline(GUI &gui, const char *label) {
-  bool pressed = false;
   char *new_label = (char*)malloc(sizeof(char) * (8 + strlen(label)));
-  snprintf(new_label, 8 + strlen(label), "RESET##%s", label);
+  snprintf(new_label, 8 + strlen(label), "Reset##%s", label);
   ImGui::SameLine();
-  pressed = ImGui::Button(new_label);
+  bool pressed = ImGui::Button(new_label);
   free(new_label);
+  return pressed;
+}
+
+bool gui_export_img_button(GUI &gui, const char *label, char **path) {
+  ImGui::Text(label);
+  ImGui::InputText("##INPUT_IMG", *path, 256);
+  ImGui::SameLine();
+  bool pressed = ImGui::Button("Export");
   return pressed;
 }
 

@@ -23,6 +23,9 @@ Image :: Image(const std::string filename) {
 Image :: Image(int w, int h, int channels) : w(w), h(h), channels(channels) {
     size = w*h*components;
     data = new uint8_t[size];
+    if (data == nullptr) {
+      throw std::invalid_argument("Failed to Create Buffer");
+    }
 }
 
 Image :: Image(const Image &img) : Image(img.w, img.h, img.channels) {
@@ -31,7 +34,6 @@ Image :: Image(const Image &img) : Image(img.w, img.h, img.channels) {
 
 Image :: ~Image() {
     stbi_image_free(data);
-
 }
 
 bool Image :: read(const char *filename) {

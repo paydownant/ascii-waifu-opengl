@@ -6,6 +6,8 @@
 #include "gui_widgets.h"
 #include "gui_helper.h"
 
+#include "export.h"
+
 GUI :: GUI() {
   glsl_version = strdup("#version 130");
 
@@ -17,8 +19,8 @@ GUI :: GUI() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 
-  display_w = 1000;
-  display_h = 1000;
+  display_w = 2000;
+  display_h = 1300;
 
   window_title = strdup("AsciiWaifu");
   window_style = DARK;
@@ -32,6 +34,12 @@ GUI :: GUI() {
   //ascii_font_path = strdup("../fonts/ascii.ttf");
 
   draw_properties.ascii_set = strdup("O");
+  draw_properties.ascii_scale = draw_properties.default_val.ascii_scale;
+  draw_properties.aspect_ratio = draw_properties.default_val.aspect_ratio;
+  draw_properties.ascii_font.size_slider = font_pixels.sizes[draw_properties.default_val.font_set_index];
+  draw_properties.tool_window_ratio = .18f;
+
+  output_path = strdup("../output.png");
 }
 
 GUI :: ~GUI() {
@@ -47,11 +55,11 @@ GUI :: ~GUI() {
   glfwTerminate();
 
   clean_gui_mem();
-  
 }
 
 void GUI :: run() {
-  window = glfwCreateWindow(display_w, display_h, window_title, glfwGetPrimaryMonitor(), nullptr);
+  GLFWmonitor *primary_monitor = glfwGetPrimaryMonitor();
+  window = glfwCreateWindow(display_w, display_h, window_title, nullptr, nullptr);
   if (window == nullptr) {
     return;
   }
@@ -88,11 +96,6 @@ void GUI :: run() {
 
   load_fonts();
 
-  // Draw Properties Initial
-  draw_properties.ascii_scale = draw_properties.default_val.ascii_scale;
-  draw_properties.aspect_ratio = draw_properties.default_val.aspect_ratio;
-  draw_properties.ascii_font.size_slider = font_pixels.sizes[draw_properties.default_val.font_set_index];
-
   // State
   ImVec4 clear_color = bg_colour;
   w_open_ascii = NULL;
@@ -116,22 +119,24 @@ void GUI :: run() {
       continue;
     }
 
-    // Process Input
-    process_input();
-
     // Start the ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
     // Body
+
     ascii_window(&w_open_ascii);
+    
     tool_window(&w_open_tool);
 
     // Body End
 
     // Rendering
     ImGui::Render();
+
+    // Process Input
+    process_input();
     
     glfwGetFramebufferSize(window, &display_w, &display_h);
     glViewport(0, 0, display_w, display_h);
@@ -140,7 +145,6 @@ void GUI :: run() {
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     glfwSwapBuffers(window);
-
   }
 }
 
@@ -195,11 +199,16 @@ void GUI :: process_input() {
     update_font_size();
   }
   
+  // GUI update should be placed above
   if (pend_update_buffer) {
     if (aui->is_base_img_loaded()) {
       update_resolution();
       aui->createVertexBuffer(draw_properties.resolution, draw_properties.aspect_ratio);
     }
+  }
+
+  if (widgets.button_export_img) {
+    export_img();
   }
 }
 
@@ -210,18 +219,19 @@ void GUI :: ascii_window(bool is_open) {
 
   ImGui::Begin("Render", &is_open, ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings);
 
-  ImGui::PushFont(draw_properties.tool_font.font);
-  ImGui::Text(aui_path);
-  ImGui::PopFont();
-
   draw_ascii();
     
   ImGui::End();
 }
 
 void GUI :: tool_window(bool is_open) {
+
+  ImGui::SetNextWindowPos(ImVec2(display_w - display_w * draw_properties.tool_window_ratio, 0));
+  ImGui::SetNextWindowSize(ImVec2(display_w * draw_properties.tool_window_ratio, display_h));
+  ImGui::SetNextWindowBgAlpha(50.0);
+
   ImGui::PushFont(draw_properties.tool_font.font);
-  ImGui::Begin("Tools", &is_open);
+  ImGui::Begin("Tools", &is_open, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings);
   
   widgets.button_load_base_image = gui_path_load_button(*this, "Image Path", &aui_path);
   
@@ -237,6 +247,8 @@ void GUI :: tool_window(bool is_open) {
   widgets.input_ascii_char = gui_text_input(*this, "Ascii Set", &draw_properties.ascii_set);
   
   widgets.button_load_ascii_font = gui_path_load_button(*this, "Font Path", &ascii_font_path);
+
+  widgets.button_export_img = gui_export_img_button(*this, "Export Window as Image", &output_path);
 
   ImGui::End();
   ImGui::PopFont();
@@ -273,7 +285,7 @@ void GUI :: draw_ascii() {
 }
 
 void GUI :: update_resolution() {
-  draw_properties.resolution = draw_properties.ascii_scale * display_w / draw_properties.ascii_font.size + ((draw_properties.ascii_scale * display_w / draw_properties.ascii_font.size) * (.5f - draw_properties.aspect_ratio));
+  draw_properties.resolution = (1 - draw_properties.tool_window_ratio) * draw_properties.ascii_scale * (display_w / draw_properties.ascii_font.size + ((draw_properties.ascii_scale * display_w / draw_properties.ascii_font.size) * (.5f - draw_properties.aspect_ratio)));
 }
 
 void GUI :: update_font_size() {
@@ -364,14 +376,30 @@ void GUI :: refresh_fonts() {
   draw_properties.im_default_font = font_atlas->AddFontDefault();
 }
 
+void GUI :: export_img() {
+  uint channels = 4;
+  uint *buffer = new uint[display_w * display_h * channels];
+  if (buffer == nullptr) {
+    fprintf(stderr, "Failed to Create Export Buffer\n");
+    return;
+  }
+  glReadPixels(0, 0, display_w, display_h, GL_RGBA, GL_UNSIGNED_INT, buffer);
+  
+  if (!export_buffer_to_img(display_w, display_h, channels, buffer, output_path)) {
+    fprintf(stderr, "Failed to Export\n");
+  }
+  delete(buffer);
+}
+
 void GUI :: clean_gui_mem() {
   // draw_properties
   free(draw_properties.ascii_set);
 
   // gui stuff
+  free(aui_path);
   free(ascii_font_path);
   free(tool_font_path);
-  free(aui_path);
+  free(output_path);
   free(window_title);
   free(glsl_version);
 

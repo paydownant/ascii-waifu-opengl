@@ -127,8 +127,7 @@ void AUI :: clean_vertex_buffer() {
 }
 
 bool AUI :: load_base_image(std::string image_path) {
-  
-  Image *tmp_img_data;
+  Image *tmp_img_data = nullptr;
   try {
     tmp_img_data = new Image(image_path);
   } catch(const std::invalid_argument& e) {
@@ -152,7 +151,6 @@ bool AUI :: is_base_img_loaded() {
 void AUI :: clean_base_image() {
   delete(img_data);
 }
-
 
 static void error_callback(int error, const char* description) {
   fprintf(stderr, "Error: %s\n", description);

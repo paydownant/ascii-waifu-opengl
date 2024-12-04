@@ -50,7 +50,7 @@ private:
   };
 
   struct DrawProperties {
-    int resolution;
+    uint resolution;
     float aspect_ratio;
     float ascii_scale;
     ImFont *im_default_font = nullptr;
@@ -59,23 +59,20 @@ private:
     ToolFont tool_font;
     bool use_custom_font = false;
     Default default_val;
+    float tool_window_ratio;
   };
 
   struct Widgets {
     bool button_load_base_image = false;
-    
     bool slider_scale = false;
     bool button_reset_scale = false;
-    
     bool slider_aspect_ratio = false;
     bool button_reset_aspect_ratio = false;
-
     bool slider_font_size = false;
     bool button_reset_font_size = false;
-    
     bool input_ascii_char = false;
-    
     bool button_load_ascii_font = false;
+    bool button_export_img = false;
   };
 
   struct FontPixels {
@@ -93,6 +90,8 @@ private:
 
   char *aui_path = nullptr;
   AUI *aui = nullptr;
+
+  char *output_path = nullptr;
 
   char *ascii_font_path = nullptr;
   char *tool_font_path = nullptr;
@@ -118,6 +117,7 @@ private:
   void load_ascii_fonts();
   void load_fonts();
   void refresh_fonts();
+  void export_img();
 
   void clean_gui_mem();
   
@@ -127,7 +127,6 @@ public:
   ~GUI();
 
   void run();
-  
 
 };
 

@@ -57,6 +57,7 @@ add_executable(${PROJECT_NAME}
   src/gui.cpp
   src/imagesource.cpp
   src/aui.cpp
+  src/export.cpp
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC

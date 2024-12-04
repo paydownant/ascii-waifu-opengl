@@ -83,6 +83,8 @@ public:
   bool is_base_img_loaded();
   void clean_base_image();
 
+  bool export_buffer_to_img(const int width, const int height, const uint8_t *buffer, const char *path);
+
 private:
   void drawAUI(FILE *output_ptr);
   
