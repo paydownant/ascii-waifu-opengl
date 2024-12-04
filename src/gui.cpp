@@ -17,8 +17,8 @@ GUI :: GUI() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 
-  window_width = 2000;
-  window_height = 1300;
+  display_w = 1000;
+  display_h = 1000;
 
   window_title = strdup("AsciiWaifu");
   window_style = DARK;
@@ -54,7 +54,7 @@ GUI :: ~GUI() {
 }
 
 void GUI :: run() {
-  window = glfwCreateWindow(window_width, window_height, window_title, nullptr, nullptr);
+  window = glfwCreateWindow(display_w, display_h, window_title, glfwGetPrimaryMonitor(), nullptr);
   if (window == nullptr) {
     return;
   }
@@ -89,26 +89,24 @@ void GUI :: run() {
   font_atlas = io.Fonts;
   ImFontConfig font_config;
 
-  //load_tool_font();
-  //load_ascii_fonts();
   load_fonts();
 
   // Draw Properties Initial
   draw_properties.aspect_ratio = 0.4f;
   draw_properties.ascii_scale = 2.0f;
 
-  update_resolution();
-
   // State
   ImVec4 clear_color = bg_colour;
-  w_open_ascii = true;
-  w_open_tool = true;
+  w_open_ascii = NULL;
+  w_open_tool = NULL;
   
-  // Initial image
-
+  // Initiate AUI
   aui = new AUI();
+
   //aui->load_base_image(aui_path);
   //aui->createVertexBuffer(draw_properties.resolution, draw_properties.aspect_ratio);
+
+  update_resolution();
 
   // Main Loop
   while (!glfwWindowShouldClose(window)) {
@@ -156,8 +154,9 @@ void GUI :: process_input() {
   bool pend_update_buffer = false;
 
   if (widgets.button_load_base_image) {
-    aui->load_base_image(aui_path);
     pend_update_buffer = true;
+    aui->load_base_image(aui_path);
+    
   }
 
   if (widgets.slider_scale || widgets.slider_aspect_ratio) {
@@ -173,6 +172,7 @@ void GUI :: process_input() {
 
   if (widgets.input_ascii_char) {
     // no need to implement for now since ascii_set is updated every frame
+    pend_update_buffer = true;
   }
 
   if (widgets.button_load_ascii_font) {
@@ -186,7 +186,7 @@ void GUI :: process_input() {
     if (aui->is_base_img_loaded()) {
       update_resolution();
       aui->createVertexBuffer(draw_properties.resolution, draw_properties.aspect_ratio);
-    } 
+    }
   }
 }
 
@@ -195,7 +195,7 @@ void GUI :: ascii_window(bool is_open) {
   ImGui::SetNextWindowPos(ImVec2(0, 0));
   ImGui::SetNextWindowBgAlpha(0.0);
 
-  ImGui::Begin("Phantom", &is_open, ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings);
+  ImGui::Begin("Render", &is_open, ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings);
 
   ImGui::PushFont(draw_properties.tool_font.font);
   ImGui::Text(aui_path);
@@ -208,7 +208,7 @@ void GUI :: ascii_window(bool is_open) {
 
 void GUI :: tool_window(bool is_open) {
   ImGui::PushFont(draw_properties.tool_font.font);
-  ImGui::Begin("Tools", &is_open, 0);
+  ImGui::Begin("Tools", &is_open);
   
   widgets.button_load_base_image = gui_path_load_button(*this, "Image Path", &aui_path);
   widgets.slider_scale = gui_slider_float(*this, "Scale", &draw_properties.ascii_scale, 0.1, 5.0);
@@ -227,7 +227,7 @@ void GUI :: draw_ascii() {
     return;
   }
 
-  ascii_data_t* data = aui->getAsciiBuffer(draw_properties.ascii_set, strlen(draw_properties.ascii_set));
+  ascii_data_t* data = aui->getAsciiBuffer(draw_properties.ascii_set, (auint)strlen(draw_properties.ascii_set));
   for (auint i = 0; i < data->height; ++i) {
     for (auint j = 0; j < data->width; ++j) {
       float r_level, g_level, b_level;
@@ -252,7 +252,7 @@ void GUI :: draw_ascii() {
 }
 
 void GUI :: update_resolution() {
-  draw_properties.resolution = draw_properties.ascii_scale * window_width / draw_properties.ascii_font.size + (draw_properties.resolution * (.5f - draw_properties.aspect_ratio));
+  draw_properties.resolution = draw_properties.ascii_scale * display_w / draw_properties.ascii_font.size + ((draw_properties.ascii_scale * display_w / draw_properties.ascii_font.size) * (.5f - draw_properties.aspect_ratio));
 }
 
 void GUI :: update_font_size() {
@@ -345,7 +345,6 @@ void GUI :: clean_gui_mem() {
   // draw_properties
   free(draw_properties.ascii_set);
   free(draw_properties.tool_font.font);
-  free(draw_properties.ascii_font.font);
 
   // gui stuff
   free(ascii_font_path);
@@ -355,7 +354,9 @@ void GUI :: clean_gui_mem() {
   free(glsl_version);
 
   // font pixels stuff
-  font_pixels.fonts.clear();
+  if (draw_properties.use_custom_font) {
+    font_pixels.fonts.clear();
+  }
 
   // font atlas
   font_atlas->Clear();

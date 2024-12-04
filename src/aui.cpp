@@ -27,19 +27,23 @@ void AUI :: drawAUI(FILE *output_ptr) {
 
 ascii_data* AUI :: getAsciiBuffer(auchar *points, auint n_points) {
 
-  ascii_data_t *data = (ascii_data_t*)malloc(sizeof(ascii_data_t));
-  assert(data);
+  ascii_data_t *data = (ascii_data_t*)malloc(sizeof(data));
+  if (data == NULL) {
+    return NULL;
+  }
   data->width = width;
   data->height = height;
 
   data->char_strip = (char*)malloc(sizeof(char*) * width * height);
   if (data->char_strip == NULL) {
     free(data);
+    return NULL;
   }
   data->colour_strip = (AuVec3*)malloc(sizeof(AuVec3) * width * height);
   if (data->colour_strip == NULL) {
     free(data->char_strip);
     free(data);
+    return NULL;
   }
 
   for (auint i = 0; i < height; ++i) {

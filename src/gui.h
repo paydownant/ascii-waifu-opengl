@@ -71,22 +71,18 @@ private:
   };
   
   char *glsl_version = nullptr;
-  int window_width = 0, window_height = 0;
+  int display_w = 0, display_h = 0;
   GLFWwindow* window = nullptr;
   char *window_title = nullptr;
   int window_style = DARK;
 
   ImVec4 bg_colour;
 
-  int display_w = 0, display_h = 0;
-
   char *aui_path = nullptr;
   AUI *aui = nullptr;
 
   char *ascii_font_path = nullptr;
   char *tool_font_path = nullptr;
-
-  
 
   DrawProperties draw_properties;
   Widgets widgets;
@@ -95,7 +91,7 @@ private:
   ImFontAtlas *font_atlas = nullptr;
   ImFontConfig *font_config = nullptr;
   
-  bool w_open_ascii, w_open_tool;
+  bool *w_open_ascii = NULL, *w_open_tool = NULL;
 
   void process_input();
   void ascii_window(bool is_open);
