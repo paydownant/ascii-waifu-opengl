@@ -44,6 +44,12 @@ private:
     int size = 25;
   };
 
+  struct Default {
+    const float ascii_scale = 2.0f;
+    const float aspect_ratio = 0.4f;
+    const int font_set_index = 7;
+  };
+
   struct DrawProperties {
     int resolution;
     float aspect_ratio;
@@ -53,15 +59,23 @@ private:
     AsciiFont ascii_font;
     ToolFont tool_font;
     bool use_custom_font = false;
-    int default_font_set_index = 7;
+    Default default_val;
   };
 
   struct Widgets {
     bool button_load_base_image = false;
+    
     bool slider_scale = false;
+    bool button_reset_scale = false;
+    
     bool slider_aspect_ratio = false;
+    bool button_reset_aspect_ratio = false;
+
     bool slider_font_size = false;
+    bool button_reset_font_size = false;
+    
     bool input_ascii_char = false;
+    
     bool button_load_ascii_font = false;
   };
 

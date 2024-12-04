@@ -31,8 +31,6 @@ GUI :: GUI() {
   //ascii_font_path = strdup("../fonts/ascii.ttf");
 
   draw_properties.ascii_set = strdup("O");
-  
-  draw_properties.aspect_ratio = 0.4f;
 
 }
 
@@ -92,8 +90,9 @@ void GUI :: run() {
   load_fonts();
 
   // Draw Properties Initial
-  draw_properties.aspect_ratio = 0.4f;
-  draw_properties.ascii_scale = 2.0f;
+  draw_properties.ascii_scale = draw_properties.default_val.ascii_scale;
+  draw_properties.aspect_ratio = draw_properties.default_val.aspect_ratio;
+  draw_properties.ascii_font.size_slider = font_pixels.sizes[draw_properties.default_val.font_set_index];
 
   // State
   ImVec4 clear_color = bg_colour;
@@ -164,9 +163,25 @@ void GUI :: process_input() {
     pend_update_buffer = true;
   }
 
+  if (widgets.button_reset_scale) {
+    pend_update_buffer = true;
+    draw_properties.ascii_scale = draw_properties.default_val.ascii_scale;
+  }
+
+  if (widgets.button_reset_aspect_ratio) {
+    pend_update_buffer = true;
+    draw_properties.aspect_ratio = draw_properties.default_val.aspect_ratio;
+  }
+
   if (widgets.slider_font_size) {
     // update font size
     pend_update_buffer = true;
+    update_font_size();
+  }
+
+  if (widgets.button_reset_font_size) {
+    pend_update_buffer = true;
+    draw_properties.ascii_font.size_slider = font_pixels.sizes[draw_properties.default_val.font_set_index];
     update_font_size();
   }
 
@@ -211,10 +226,18 @@ void GUI :: tool_window(bool is_open) {
   ImGui::Begin("Tools", &is_open);
   
   widgets.button_load_base_image = gui_path_load_button(*this, "Image Path", &aui_path);
+  
   widgets.slider_scale = gui_slider_float(*this, "Scale", &draw_properties.ascii_scale, 0.1, 5.0);
+  widgets.button_reset_scale = gui_reset_button_sameline(*this, "Scale");
+
   widgets.slider_aspect_ratio = gui_slider_float(*this, "Aspect Ratio", &draw_properties.aspect_ratio, 0.1, 0.9);
+  widgets.button_reset_aspect_ratio = gui_reset_button_sameline(*this, "Aspect Ratio");
+
   widgets.slider_font_size = gui_slider_int(*this, "Font Size", &draw_properties.ascii_font.size_slider, font_pixels.sizes.front(), font_pixels.sizes.back());
+  widgets.button_reset_font_size = gui_reset_button_sameline(*this, "Font Size");
+
   widgets.input_ascii_char = gui_text_input(*this, "Ascii Set", &draw_properties.ascii_set);
+  
   widgets.button_load_ascii_font = gui_path_load_button(*this, "Font Path", &ascii_font_path);
 
   ImGui::End();
@@ -308,9 +331,9 @@ void GUI :: load_fonts() {
 
     if (is_file_ttf(ascii_font_path)) {
       load_ascii_fonts();
-      draw_properties.ascii_font.font = font_pixels.fonts[draw_properties.default_font_set_index];
-      draw_properties.ascii_font.size = font_pixels.sizes[draw_properties.default_font_set_index];
-      draw_properties.ascii_font.size_slider = font_pixels.sizes[draw_properties.default_font_set_index];
+      draw_properties.ascii_font.font = font_pixels.fonts[draw_properties.default_val.font_set_index];
+      draw_properties.ascii_font.size = font_pixels.sizes[draw_properties.default_val.font_set_index];
+      draw_properties.ascii_font.size_slider = font_pixels.sizes[draw_properties.default_val.font_set_index];
     } else {
       draw_properties.ascii_font.font = draw_properties.im_default_font;
     }
