@@ -49,6 +49,13 @@ private:
     const int font_set_index = 7;
   };
 
+  struct DrawBoundary {
+    uint x_min = 0;
+    uint x_max = 0;
+    uint y_min = 0;
+    uint y_max = 0;
+  };
+
   struct DrawProperties {
     uint resolution;
     float aspect_ratio;
@@ -59,6 +66,7 @@ private:
     ToolFont tool_font;
     bool use_custom_font = false;
     Default default_val;
+    DrawBoundary boundary;
     float tool_window_ratio;
   };
 

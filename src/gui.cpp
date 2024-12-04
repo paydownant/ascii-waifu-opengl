@@ -261,23 +261,48 @@ void GUI :: draw_ascii() {
   }
 
   ascii_data_t* data = aui->getAsciiBuffer(draw_properties.ascii_set, (auint)strlen(draw_properties.ascii_set));
-  for (auint i = 0; i < data->height; ++i) {
-    for (auint j = 0; j < data->width; ++j) {
+  if (data == nullptr) {
+    return;
+  }
+
+  ImGui::PushFont(draw_properties.ascii_font.font);
+  ImVec2 tex_size = ImGui::CalcTextSize("O");
+  float font_w = tex_size.x, font_h = tex_size.y + 4;
+  for (auint y = 0; y < data->height; ++y) {
+    for (auint x = 0; x < data->width; ++x) {
       float r_level, g_level, b_level;
-      r_level = data->colour_strip[i * data->width + j].x;
-      g_level = data->colour_strip[i * data->width + j].y;
-      b_level = data->colour_strip[i * data->width + j].z;
+      r_level = data->colour_strip[y * data->width + x].x;
+      g_level = data->colour_strip[y * data->width + x].y;
+      b_level = data->colour_strip[y * data->width + x].z;
       
       ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(r_level, g_level, b_level, 1.0f));
-      ImGui::PushFont(draw_properties.ascii_font.font);
-      ImGui::Text("%c", data->char_strip[i * data->width + j]);
-      ImGui::PopFont();
+      ImGui::SetCursorPosX(font_w * x);
+      ImGui::Text("%c", data->char_strip[y * data->width + x]);
+      
       ImGui::PopStyleColor();
 
       ImGui::SameLine(0.0f, 0.0f);
     }
     ImGui::NewLine();
   }
+  ImGui::PopFont();
+  
+  // Calculating Drawing Boundary
+  draw_properties.boundary.x_min = 0;
+  draw_properties.boundary.y_min = 4;
+
+  if (font_w * data->width > display_w * (1 - draw_properties.tool_window_ratio)) {
+    draw_properties.boundary.x_max = display_w * (1 - draw_properties.tool_window_ratio);
+  } else {
+    draw_properties.boundary.x_max = font_w * data->width + draw_properties.boundary.x_min;
+  }
+
+  if (font_h * data->height > display_h) {
+    draw_properties.boundary.y_max = display_h;
+  } else {
+    draw_properties.boundary.y_max = font_h * data->height + draw_properties.boundary.y_min;
+  }
+  
   free(data->char_strip);
   free(data->colour_strip);
   free(data);
@@ -378,14 +403,18 @@ void GUI :: refresh_fonts() {
 
 void GUI :: export_img() {
   uint channels = 4;
-  uint *buffer = new uint[display_w * display_h * channels];
+  uint image_size_w = draw_properties.boundary.x_max - draw_properties.boundary.x_min;
+  uint image_size_h = draw_properties.boundary.y_max - draw_properties.boundary.y_min;
+
+  uint *buffer = new uint[image_size_w * image_size_h * channels];
   if (buffer == nullptr) {
     fprintf(stderr, "Failed to Create Export Buffer\n");
     return;
   }
-  glReadPixels(0, 0, display_w, display_h, GL_RGBA, GL_UNSIGNED_INT, buffer);
+
+  glReadPixels(draw_properties.boundary.x_min, display_h - draw_properties.boundary.y_max, image_size_w, image_size_h, GL_RGBA, GL_UNSIGNED_INT, buffer);
   
-  if (!export_buffer_to_img(display_w, display_h, channels, buffer, output_path)) {
+  if (!export_buffer_to_img(image_size_w, image_size_h, channels, buffer, output_path)) {
     fprintf(stderr, "Failed to Export\n");
   }
   delete(buffer);
