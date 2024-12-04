@@ -81,6 +81,8 @@ private:
     bool input_ascii_char = false;
     bool button_load_ascii_font = false;
     bool button_export_img = false;
+
+    bool shape_bounds = false;
   };
 
   struct FontPixels {
@@ -110,12 +112,12 @@ private:
 
   ImFontAtlas *font_atlas = nullptr;
   ImFontConfig *font_config = nullptr;
-  
-  bool *w_open_ascii = NULL, *w_open_tool = NULL;
 
   void process_input();
-  void ascii_window(bool is_open);
-  void tool_window(bool is_open);
+
+  void ascii_window();
+  void tool_window();
+  void bounds_window();
 
   void draw_ascii();
   void update_resolution();
