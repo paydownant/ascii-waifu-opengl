@@ -6,8 +6,6 @@
 #include "gui_widgets.h"
 #include "gui_helper.h"
 
-#include "export.h"
-
 GUI :: GUI() {
   glsl_version = strdup("#version 130");
 
@@ -284,7 +282,6 @@ void GUI :: bounds_window() {
 }
 
 void GUI :: draw_ascii() {
-
   if (!aui->is_base_img_loaded()) {
     return;
   }
@@ -293,7 +290,6 @@ void GUI :: draw_ascii() {
   if (data == nullptr) {
     return;
   }
-
   ImGui::PushFont(draw_properties.ascii_font.font);
   ImVec2 tex_size = ImGui::CalcTextSize("O");
   float font_w = tex_size.x, font_h = tex_size.y + 4;
