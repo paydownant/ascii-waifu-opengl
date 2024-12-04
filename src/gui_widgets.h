@@ -41,6 +41,15 @@ bool gui_slider_float(GUI &gui, const char *label, float *value, float min, floa
   return pressed;
 }
 
+bool gui_reset_button(GUI &gui, const char *label) {
+  bool pressed = false;
+  char *new_label = (char*)malloc(sizeof(char) * (8 + strlen(label)));
+  snprintf(new_label, 8 + strlen(label), "RESET##%s", label);
+  pressed = ImGui::Button(new_label);
+  free(new_label);
+  return pressed;
+}
+
 bool gui_reset_button_sameline(GUI &gui, const char *label) {
   bool pressed = false;
   char *new_label = (char*)malloc(sizeof(char) * (8 + strlen(label)));
