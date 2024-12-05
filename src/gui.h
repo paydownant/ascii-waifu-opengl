@@ -5,7 +5,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <vector>
 
 #include "imgui.h"
@@ -37,7 +36,7 @@ private:
 
   struct WindowFont {
     ImFont *font = nullptr;
-    int size = 25;
+    int size = 24;
   };
 
   struct AsciiFont {
@@ -69,7 +68,7 @@ private:
     bool font_loaded = false;
     Default default_val;
     DrawBoundary boundary;
-    float tool_window_ratio;
+    int tool_window_size;
   };
 
   struct Widgets {
@@ -93,7 +92,7 @@ private:
   };
   
   char *glsl_version = nullptr;
-  int display_w = 0, display_h = 0;
+  int window_w = 0, window_h = 0;
   GLFWwindow* window = nullptr;
   char *window_title = nullptr;
   int window_style = DARK;

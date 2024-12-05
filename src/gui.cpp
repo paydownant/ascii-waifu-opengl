@@ -18,8 +18,11 @@ GUI :: GUI() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 
-  display_w = 2000;
-  display_h = 1300;
+  int display_w, display_h;
+  glfwGetMonitorWorkarea(glfwGetPrimaryMonitor(), 0, 0, &display_w, &display_h);
+
+  window_w = display_w * .8f;
+  window_h = display_h * .8f;
 
   window_title = strdup("AsciiWaifu");
   window_style = DARK;
@@ -34,7 +37,7 @@ GUI :: GUI() {
   draw_properties.ascii_scale = draw_properties.default_val.ascii_scale;
   draw_properties.aspect_ratio = draw_properties.default_val.aspect_ratio;
   draw_properties.ascii_font.size_slider = font_pixels.sizes[draw_properties.default_val.font_set_index];
-  draw_properties.tool_window_ratio = .18f;
+  draw_properties.tool_window_size = 260;
 
   output_path = strdup("output.png");
 }
@@ -56,7 +59,7 @@ GUI :: ~GUI() {
 
 void GUI :: run() {
   GLFWmonitor *primary_monitor = glfwGetPrimaryMonitor();
-  window = glfwCreateWindow(display_w, display_h, window_title, nullptr, nullptr);
+  window = glfwCreateWindow(window_w, window_h, window_title, nullptr, nullptr);
   if (window == nullptr) {
     return;
   }
@@ -135,8 +138,8 @@ void GUI :: run() {
     // Process Input
     process_input();
     
-    glfwGetFramebufferSize(window, &display_w, &display_h);
-    glViewport(0, 0, display_w, display_h);
+    glfwGetFramebufferSize(window, &window_w, &window_h);
+    glViewport(0, 0, window_w, window_h);
     glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
     glClear(GL_COLOR_BUFFER_BIT);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -214,7 +217,7 @@ void GUI :: ascii_window() {
   ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoTitleBar  |
   ImGuiWindowFlags_NoScrollbar        | ImGuiWindowFlags_NoDecoration          | ImGuiWindowFlags_NoResize    |
   ImGuiWindowFlags_NoMove             | ImGuiWindowFlags_NoSavedSettings       | ImGuiWindowFlags_NoNav;
-  ImGui::SetNextWindowSize(ImVec2((float)display_w, (float)display_h));
+  ImGui::SetNextWindowSize(ImVec2((float)window_w, (float)window_h));
   ImGui::SetNextWindowPos(ImVec2(0, 0));
   ImGui::SetNextWindowBgAlpha(0.0);
 
@@ -228,8 +231,8 @@ void GUI :: ascii_window() {
 void GUI :: tool_window() {
   ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings;
 
-  ImGui::SetNextWindowPos(ImVec2(display_w - display_w * draw_properties.tool_window_ratio, 0));
-  ImGui::SetNextWindowSize(ImVec2(display_w * draw_properties.tool_window_ratio, display_h));
+  ImGui::SetNextWindowPos(ImVec2(window_w - draw_properties.tool_window_size, 0));
+  ImGui::SetNextWindowSize(ImVec2(draw_properties.tool_window_size, window_h));
   ImGui::SetNextWindowBgAlpha(0.8);
 
   ImGui::PushFont(draw_properties.window_font.font);
@@ -266,8 +269,8 @@ void GUI :: bounds_window() {
   ImGuiWindowFlags_NoResize           | ImGuiWindowFlags_NoMove                | ImGuiWindowFlags_NoSavedSettings | 
   ImGuiWindowFlags_NoScrollbar        | ImGuiWindowFlags_NoDecoration          | ImGuiWindowFlags_NoNav;
 
-  unsigned int boundary_size_w = display_w * (1 - draw_properties.tool_window_ratio) - draw_properties.boundary.x_min;
-  unsigned int boundary_size_h = display_h - draw_properties.boundary.y_min;
+  unsigned int boundary_size_w = window_w - draw_properties.tool_window_size - draw_properties.boundary.x_min;
+  unsigned int boundary_size_h = window_h - draw_properties.boundary.y_min;
 
   ImGui::SetNextWindowPos(ImVec2(draw_properties.boundary.x_min, draw_properties.boundary.y_min));
   ImGui::SetNextWindowSize(ImVec2(boundary_size_w, boundary_size_h));
@@ -323,8 +326,8 @@ void GUI :: draw_ascii() {
   free(data->colour_strip);
   free(data);
   
-  unsigned int drawable_max_x = display_w * (1 - draw_properties.tool_window_ratio);
-  unsigned int drawable_max_y = display_h;
+  unsigned int drawable_max_x = window_w - draw_properties.tool_window_size;
+  unsigned int drawable_max_y = window_h;
   // Check for Out of Bounds
   if (draw_properties.boundary.x_max > drawable_max_x || draw_properties.boundary.y_max > drawable_max_y) {
     widgets.shape_bounds = true;
@@ -335,8 +338,8 @@ void GUI :: draw_ascii() {
 }
 
 void GUI :: update_resolution() {
-  draw_properties.resolution = (1 - draw_properties.tool_window_ratio) * draw_properties.ascii_scale
-   * (display_w / draw_properties.ascii_font.size + ((display_w / draw_properties.ascii_font.size) * (.5f - draw_properties.aspect_ratio)));
+  draw_properties.resolution = (1 - draw_properties.tool_window_size / window_w) * draw_properties.ascii_scale
+   * (window_w / draw_properties.ascii_font.size + ((window_w / draw_properties.ascii_font.size) * (.5f - draw_properties.aspect_ratio)));
 
 }
 
@@ -430,7 +433,7 @@ void GUI :: export_img() {
     return;
   }
 
-  glReadPixels(draw_properties.boundary.x_min, display_h - draw_properties.boundary.y_max, image_size_w, image_size_h, GL_RGBA, GL_UNSIGNED_INT, buffer);
+  glReadPixels(draw_properties.boundary.x_min, window_h - draw_properties.boundary.y_max, image_size_w, image_size_h, GL_RGBA, GL_UNSIGNED_INT, buffer);
   
   if (!export_buffer_to_img(image_size_w, image_size_h, channels, buffer, output_path)) {
     fprintf(stderr, "Failed to Export\n");
