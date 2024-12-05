@@ -292,25 +292,25 @@ void GUI :: draw_ascii() {
     return;
   }
 
-  ascii_data_t* data = aui->getAsciiBuffer(draw_properties.ascii_set, (unsigned int)strlen(draw_properties.ascii_set));
-  if (data == nullptr) {
-    return;
-  }
+  ascii_data_t data;
+  
+  aui->getAsciiBuffer(&data, draw_properties.ascii_set, (unsigned int)strlen(draw_properties.ascii_set));
+
   ImGui::PushFont(draw_properties.ascii_font.font);
   ImVec2 tex_size = ImGui::CalcTextSize("O");
   float font_w = tex_size.x, font_h = tex_size.y;
-  for (unsigned int y = 0; y < data->height; ++y) {
-    for (unsigned int x = 0; x < data->width; ++x) {
+  for (unsigned int y = 0; y < data.height; ++y) {
+    for (unsigned int x = 0; x < data.width; ++x) {
       float r_level, g_level, b_level;
-      r_level = data->colour_strip[y * data->width + x].x;
-      g_level = data->colour_strip[y * data->width + x].y;
-      b_level = data->colour_strip[y * data->width + x].z;
+      r_level = data.colour_strip[y * data.width + x].x;
+      g_level = data.colour_strip[y * data.width + x].y;
+      b_level = data.colour_strip[y * data.width + x].z;
       
       ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(r_level, g_level, b_level, 1.0f));
       
       ImGui::SetCursorPosX(font_w * x);
       ImGui::SetCursorPosY(font_h * y);
-      ImGui::Text("%c", data->char_strip[y * data->width + x]);
+      ImGui::Text("%c", data.char_strip[y * data.width + x]);
       
       ImGui::PopStyleColor();
 
@@ -319,17 +319,15 @@ void GUI :: draw_ascii() {
     ImGui::NewLine();
   }
   ImGui::PopFont();
+  free(data.char_strip);
+  free(data.colour_strip);
   
   // Calculating Drawing Boundary
   draw_properties.boundary.x_min = 0;
   draw_properties.boundary.y_min = 0;
 
-  draw_properties.boundary.x_max = font_w * data->width + draw_properties.boundary.x_min;
-  draw_properties.boundary.y_max = font_h * data->height + draw_properties.boundary.y_min;
-  
-  free(data->char_strip);
-  free(data->colour_strip);
-  free(data);
+  draw_properties.boundary.x_max = font_w * data.width + draw_properties.boundary.x_min;
+  draw_properties.boundary.y_max = font_h * data.height + draw_properties.boundary.y_min;
   
   unsigned int drawable_max_x = window_w - draw_properties.tool_window_size;
   unsigned int drawable_max_y = window_h;
@@ -339,7 +337,6 @@ void GUI :: draw_ascii() {
   } else {
     widgets.shape_bounds = false;
   }
-
 }
 
 void GUI :: update_resolution() {
@@ -443,7 +440,6 @@ void GUI :: export_img() {
   if (!export_buffer_to_img(image_size_w, image_size_h, channels, buffer, output_path)) {
     fprintf(stderr, "Failed to Export\n");
   }
-  delete(buffer);
 }
 
 void GUI :: clean_gui_mem() {
@@ -451,7 +447,6 @@ void GUI :: clean_gui_mem() {
   free(draw_properties.ascii_set);
 
   // gui stuff
-  free(aui_path);
   free(custom_font_path);
   free(output_path);
   free(window_title);

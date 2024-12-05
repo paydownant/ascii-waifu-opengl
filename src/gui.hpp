@@ -42,7 +42,7 @@ private:
   struct AsciiFont {
     ImFont *font = nullptr;
     int size = 20;
-    int size_slider;
+    int size_slider = 0;
   };
 
   struct Default {
@@ -59,16 +59,16 @@ private:
   };
 
   struct DrawProperties {
-    unsigned int resolution;
-    float aspect_ratio;
-    float ascii_scale;
+    unsigned int resolution = 0;
+    float aspect_ratio = 0.0;
+    float ascii_scale = 0.0;
     WindowFont window_font;
     auchar *ascii_set = nullptr;
     AsciiFont ascii_font;
     bool font_loaded = false;
     Default default_val;
     DrawBoundary boundary;
-    int tool_window_size;
+    int tool_window_size = 0;
   };
 
   struct Widgets {
