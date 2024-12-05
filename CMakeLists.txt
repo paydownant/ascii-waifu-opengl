@@ -25,9 +25,7 @@ target_include_directories(ImGui PUBLIC
   ${IMGUI_DIR}
   ${IMGUI_BACKENDS_DIR}
 )
-target_link_libraries(${PROJECT_NAME} PRIVATE
-  ImGui
-)
+target_link_libraries(${PROJECT_NAME} PRIVATE ImGui)
 
 # Find dependencies
 find_package(glfw3 CONFIG REQUIRED)
@@ -37,7 +35,6 @@ target_link_libraries(ImGui PRIVATE glfw)
  # set(OpenGL_GL_PREFERENCE GLVND)
 find_package(OpenGL REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE OpenGL::GL)
-
 
 
 target_include_directories(${PROJECT_NAME} PUBLIC
