@@ -72,7 +72,7 @@ private:
 public:
   AUI();
   ~AUI();
-  ascii_data* getAsciiBuffer(auchar *points, unsigned int n_points);
+  bool getAsciiBuffer(ascii_data_t *data, auchar* points, unsigned int n_points);
   
   bool createVertexBuffer(unsigned int target_width_px, float aspect_ratio);
   void clean_vertex_buffer();
@@ -80,8 +80,6 @@ public:
   bool load_base_image(std::string image_path);
   bool is_base_img_loaded();
   void clean_base_image();
-
-  bool export_buffer_to_img(const int width, const int height, const uint8_t *buffer, const char *path);
 
 private:
   void drawAUI(FILE *output_ptr);

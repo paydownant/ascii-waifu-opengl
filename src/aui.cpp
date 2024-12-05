@@ -3,6 +3,8 @@
 #include <stdexcept>
 
 AUI :: AUI() {
+    width = 0;
+    height = 0;
 }
 
 AUI :: ~AUI() {
@@ -23,25 +25,19 @@ void AUI :: drawAUI(FILE *output_ptr) {
   }
 }
 
-ascii_data* AUI :: getAsciiBuffer(auchar *points, unsigned int n_points) {
+bool AUI :: getAsciiBuffer(ascii_data_t *data, auchar *points, unsigned int n_points) {
 
-  ascii_data_t *data = (ascii_data_t*)malloc(sizeof(data));
-  if (data == NULL) {
-    return NULL;
-  }
   data->width = width;
   data->height = height;
 
-  data->char_strip = (char*)malloc(sizeof(char*) * width * height);
+  data->char_strip = (char*)malloc(sizeof(char*) * width * height + 1);
   if (data->char_strip == NULL) {
-    free(data);
-    return NULL;
+    return false;
   }
   data->colour_strip = (AuVec3*)malloc(sizeof(AuVec3) * width * height);
   if (data->colour_strip == NULL) {
     free(data->char_strip);
-    free(data);
-    return NULL;
+    return false;
   }
 
   for (unsigned int i = 0; i < height; ++i) {
@@ -55,7 +51,6 @@ ascii_data* AUI :: getAsciiBuffer(auchar *points, unsigned int n_points) {
       float threshold = 0.01;
 
       unsigned int point_index = (unsigned int)(pow(bw_level, 1.2) * n_points);
-      
       if (bw_level > threshold) {
         data->char_strip[i * width + j] = points[point_index];
       } else {
@@ -67,8 +62,7 @@ ascii_data* AUI :: getAsciiBuffer(auchar *points, unsigned int n_points) {
       data->colour_strip[i * width + j].z = vertices[i * width + j].level.z;
     }
   }
-  
-  return data;
+  return true;
 }
 
 bool AUI :: createVertexBuffer(unsigned int target_width_px, float aspect_ratio) {
