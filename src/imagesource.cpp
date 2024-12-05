@@ -1,13 +1,12 @@
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 
+#include <stdexcept>
 
-#include "imagesource.h"
 #include "stb_image/stb_image.h"
 #include "stb_image/stb_image_write.h"
 
-#include <stdexcept>
-
+#include "imagesource.hpp"
 
 Image :: Image(const std::string filename) {
     const char *filename_c = filename.c_str();

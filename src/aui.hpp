@@ -1,12 +1,12 @@
-#ifndef AUI_H
-#define AUI_H
+#ifndef AUI_HPP
+#define AUI_HPP
 
 #include <string>
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "imagesource.h"
+#include "imagesource.hpp"
 
 static void error_callback(int error, const char *desc);
 

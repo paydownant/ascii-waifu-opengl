@@ -1,5 +1,5 @@
-#ifndef GUI_HELPER
-#define GUI_HELPER
+#ifndef GUI_HELPER_HPP
+#define GUI_HELPER_HPP
 
 #include <iostream>
 #include <fstream>
@@ -7,7 +7,7 @@
 #include <ctype.h>
 #include <stdexcept>
 
-#include "imagesource.h"
+#include "imagesource.hpp"
 
 static void glfw_error_callback(int error, const char* description) {
   fprintf(stderr, "GLFW Error %d: %s\n", error, description);

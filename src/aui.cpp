@@ -1,4 +1,4 @@
-#include "aui.h"
+#include "aui.hpp"
 
 #include <stdexcept>
 

@@ -1,5 +1,5 @@
-#ifndef IMAGESOURCE_H
-#define IMAGESOURCE_H
+#ifndef IMAGESOURCE_HPP
+#define IMAGESOURCE_HPP
 
 #include <stdint.h>
 #include <cstdio>

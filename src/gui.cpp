@@ -1,11 +1,11 @@
 
 #include <GLFW/glfw3.h>
 
-#include "gui.h"
-#include "gui_widgets.h"
-#include "gui_helper.h"
+#include "gui.hpp"
+#include "gui_widgets.hpp"
+#include "gui_helper.hpp"
 
-#include "font_bin_compressed.h"
+#include "font_bin_compressed.hpp"
 
 GUI :: GUI() {
   glsl_version = strdup("#version 330");

@@ -1,7 +1,7 @@
-#ifndef GUI_WIDGETS_H
-#define GUI_WIDGETS_H
+#ifndef GUI_WIDGETS_HPP
+#define GUI_WIDGETS_HPP
 
-#include "gui.h"
+#include "gui.hpp"
 
 bool gui_path_load_button(GUI &gui, const char *label, char **path) {
   ImGui::Text(label);
