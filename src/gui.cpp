@@ -8,7 +8,7 @@
 #include "font_bin_compressed.hpp"
 
 GUI :: GUI() {
-  glsl_version = strdup("#version 330");
+  glsl_version = strdup("#version 130");
 
   glfwSetErrorCallback(glfw_error_callback);
   if (!glfwInit()) {

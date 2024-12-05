@@ -1,5 +1,5 @@
 {
-  "name": "app",
+  "name": "asciiwaifu",
   "version": "1.0",
   "dependencies": [ "glfw3" ]
 }
