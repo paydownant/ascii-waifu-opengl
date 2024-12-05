@@ -18,8 +18,8 @@ GUI :: GUI() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 
-  int display_w, display_h;
-  glfwGetMonitorWorkarea(glfwGetPrimaryMonitor(), 0, 0, &display_w, &display_h);
+  int display_x = 10, display_y = 10, display_w = 1200, display_h = 800;
+  glfwGetMonitorWorkarea(glfwGetPrimaryMonitor(), &display_x, &display_y, &display_w, &display_h);
 
   window_w = display_w * .8f;
   window_h = display_h * .8f;
@@ -277,8 +277,12 @@ void GUI :: bounds_window() {
   ImGui::SetNextWindowBgAlpha(0.0);
 
   ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 5.0f);
+  
   ImGui::Begin("Bounds", NULL, flags);
   ImGui::End();
+
+  ImGui::PopStyleVar();
   ImGui::PopStyleColor();
 
 }
@@ -303,6 +307,7 @@ void GUI :: draw_ascii() {
       b_level = data->colour_strip[y * data->width + x].z;
       
       ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(r_level, g_level, b_level, 1.0f));
+      
       ImGui::SetCursorPosX(font_w * x);
       ImGui::SetCursorPosY(font_h * y);
       ImGui::Text("%c", data->char_strip[y * data->width + x]);
@@ -338,7 +343,7 @@ void GUI :: draw_ascii() {
 }
 
 void GUI :: update_resolution() {
-  draw_properties.resolution = (1 - draw_properties.tool_window_size / window_w) * draw_properties.ascii_scale
+  draw_properties.resolution = 1.66f * draw_properties.ascii_scale
    * (window_w / draw_properties.ascii_font.size + ((window_w / draw_properties.ascii_font.size) * (.5f - draw_properties.aspect_ratio)));
 
 }

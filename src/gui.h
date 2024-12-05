@@ -46,7 +46,7 @@ private:
   };
 
   struct Default {
-    const float ascii_scale = 2.0f;
+    const float ascii_scale = 1.0f;
     const float aspect_ratio = 0.5f;
     const int font_set_index = 7;
   };
