@@ -113,6 +113,7 @@ private:
   ImFontAtlas *font_atlas = nullptr;
   ImFontConfig *font_config = nullptr;
 
+  void set_window_icon();
   void process_input();
 
   void ascii_window();

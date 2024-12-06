@@ -6,9 +6,10 @@
 #include "gui_helper.hpp"
 
 #include "font_bin_compressed.hpp"
+#include "icon_bin_pixel.hpp"
 
 GUI :: GUI() {
-  glsl_version = strdup("#version 130");
+  glsl_version = strdup("#version 330");
 
   glfwSetErrorCallback(glfw_error_callback);
   if (!glfwInit()) {
@@ -40,38 +41,23 @@ GUI :: GUI() {
   draw_properties.tool_window_size = 260;
 
   output_path = strdup("output.png");
-}
 
-GUI :: ~GUI() {
-  printf("Terminating GUI\n");
-  // Clean up
-  delete(aui);
 
-  ImGui_ImplOpenGL3_Shutdown();
-  ImGui_ImplGlfw_Shutdown();
-  ImGui::DestroyContext();
-
-  glfwDestroyWindow(window);
-  glfwTerminate();
-
-  clean_gui_mem();
-}
-
-void GUI :: run() {
+  // GLFW
   GLFWmonitor *primary_monitor = glfwGetPrimaryMonitor();
   window = glfwCreateWindow(window_w, window_h, window_title, nullptr, nullptr);
   if (window == nullptr) {
-    return;
+    glfw_error_callback(1, "Failed to Create GLFW Window");
   }
-
   glfwMakeContextCurrent(window);
   glfwSwapInterval(1);
+
+  // Set Window Icon
+  set_window_icon();
 
   // Setup ImGui context
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
-  ImGuiIO &io = ImGui::GetIO(); (void)io;
-  io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
   // Setup ImGui style
   switch (window_style) {
@@ -89,6 +75,56 @@ void GUI :: run() {
   // Setup Platform/Renderer backends
   ImGui_ImplGlfw_InitForOpenGL(window, true);
   ImGui_ImplOpenGL3_Init(glsl_version);
+}
+
+GUI :: ~GUI() {
+  printf("Terminating GUI\n");
+  // Clean up
+  delete(aui);
+
+  ImGui_ImplOpenGL3_Shutdown();
+  ImGui_ImplGlfw_Shutdown();
+  ImGui::DestroyContext();
+
+  glfwDestroyWindow(window);
+  glfwTerminate();
+
+  clean_gui_mem();
+}
+
+void GUI :: set_window_icon() {
+  //Image image("../icon.png");
+  //image.write_strip_hpp("../src/icon_bin_pixel.hpp");
+  bool set_icon = false;
+  switch (glfwGetPlatform()) {
+    case GLFW_PLATFORM_WIN32:
+      set_icon = true;
+      break;
+    case GLFW_PLATFORM_X11:
+      set_icon = true;
+      break;
+    case GLFW_PLATFORM_UNAVAILABLE:
+      set_icon = false;
+      break;
+    default:
+      set_icon = false;
+      break;
+  }
+  
+  if (set_icon) {
+    GLFWimage icon_image;
+    icon_image.width = icon_image_pixel_size[0];
+    icon_image.height = icon_image_pixel_size[1];
+    icon_image.pixels = icon_image_pixel_data;
+
+    glfwSetWindowIcon(window, 1, &icon_image);
+  }
+}
+
+void GUI :: run() {
+  // Get IO
+  ImGuiIO &io = ImGui::GetIO(); (void)io;
+  io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
   // Load fonts here
   font_atlas = io.Fonts;
