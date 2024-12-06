@@ -30,9 +30,9 @@ GUI :: GUI() {
 
   bg_colour = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
 
-  aui_path = strdup("image.png");
+  aui_path = strdup("input/path.image");
 
-  custom_font_path = strdup("font.ttf");
+  custom_font_path = strdup("custom/font.ttf");
 
   draw_properties.ascii_set = strdup("O");
   draw_properties.ascii_scale = draw_properties.default_val.ascii_scale;
@@ -40,7 +40,7 @@ GUI :: GUI() {
   draw_properties.ascii_font.size_slider = font_pixels.sizes[draw_properties.default_val.font_set_index];
   draw_properties.tool_window_size = 260;
 
-  output_path = strdup("output.png");
+  output_path = strdup("dest/path.image");
 
 
   // GLFW
