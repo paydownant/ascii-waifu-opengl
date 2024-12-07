@@ -455,6 +455,10 @@ void GUI :: load_fonts() {
 }
 
 void GUI :: export_img() {
+  if (!aui->is_base_img_loaded()) {
+    // Base Image Not Loaded
+    return;
+  }
 
   if (widgets.shape_bounds) {
     // Out of Bounds
