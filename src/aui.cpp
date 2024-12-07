@@ -13,7 +13,6 @@ AUI :: ~AUI() {
   clean_base_image();
 }
 
-
 void AUI :: drawAUI(FILE *output_ptr) {
   for (unsigned int i = 0; i < height; ++i) {
     for (unsigned int j = 0; j < width; ++j) {
