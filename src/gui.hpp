@@ -92,6 +92,7 @@ private:
   };
   
   char *glsl_version = nullptr;
+  int platform = 0;
   int window_w = 0, window_h = 0;
   GLFWwindow* window = nullptr;
   char *window_title = nullptr;

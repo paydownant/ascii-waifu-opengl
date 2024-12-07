@@ -19,6 +19,10 @@ GUI :: GUI() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 
+  // Get Platform
+  platform = glfwGetPlatform();
+
+  // Get Display Size
   int display_x = 10, display_y = 10, display_w = 1200, display_h = 800;
   glfwGetMonitorWorkarea(glfwGetPrimaryMonitor(), &display_x, &display_y, &display_w, &display_h);
 
@@ -96,7 +100,7 @@ void GUI :: set_window_icon() {
   //Image image("../icon.png");
   //image.write_strip_hpp("../src/icon_bin_pixel.hpp");
   bool set_icon = false;
-  switch (glfwGetPlatform()) {
+  switch (platform) {
     case GLFW_PLATFORM_WIN32:
       set_icon = true;
       break;
@@ -445,6 +449,7 @@ void GUI :: load_fonts() {
       load_window_font();
       load_custom_ascii_fonts();
     } else {
+      fprintf(stderr, "File Format Specified is Not TTF\n");
       return;
     }
   }
@@ -457,11 +462,13 @@ void GUI :: load_fonts() {
 void GUI :: export_img() {
   if (!aui->is_base_img_loaded()) {
     // Base Image Not Loaded
+    fprintf(stderr, "Base Image is Not Loaded\n");
     return;
   }
 
   if (widgets.shape_bounds) {
     // Out of Bounds
+    fprintf(stderr, "Ascii Image is Out of Bounds\n");
     return;
   }
 
