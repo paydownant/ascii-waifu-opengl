@@ -22,10 +22,10 @@ Dependencies
 - glfw3
 - xorg
 <hr>
-Fonts
+Default Fonts
 
-- [OpenSans](https://fonts.google.com/specimen/Open+Sans) - Window
-- [GNU Unifont](https://unifoundry.com/unifont/index.html) - Ascii Rendering
+- [Open Sans](https://fonts.google.com/specimen/Open+Sans) - Window
+- [Pixelify Sans](https://fonts.google.com/specimen/Pixelify+Sans) - Ascii Rendering
 
 You can use custom fonts in .ttf format
 <hr>
