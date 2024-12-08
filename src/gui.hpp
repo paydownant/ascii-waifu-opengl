@@ -61,7 +61,7 @@ private:
   struct Widgets {
     ImVec2 pos;
     ImVec2 size;
-    int padding = 0;
+    int padding = 1;
     float ratio = 0.6;
     bool button_load_base_image = false;
     bool slider_scale = false;
@@ -89,13 +89,32 @@ private:
     std::vector<int> sizes = {6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40};
   };
 
+  struct UIStyle {
+    ImVec4 col_background = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
+    
+    float alpha_tool_background = 0.65f;
+
+    ImVec4 col_border = ImVec4(0.3f, 0.3f, 0.3f, 1.0f);
+
+    ImVec4 col_widget = ImVec4(0.15f, 0.15f, 0.15f, 1.0f);
+    ImVec4 col_widget_hover = ImVec4(0.2f, 0.2f, 0.2f, 1.0f);
+    ImVec4 col_widget_active = ImVec4(0.25f, 0.25f, 0.25f, 1.0f);
+    
+    ImVec4 col_slider = ImVec4(0.35f, 0.35f, 0.35f, 1.0f);
+    ImVec4 col_slider_active = ImVec4(0.6f, 0.0f, 0.0f, 1.0f);
+  };
+
   struct UI {
     int platform = 0;
     int window_w = 0, window_h = 0;
     GLFWwindow* window = nullptr;
-    char *window_title = nullptr;
+    std::string window_title;
     int window_style = DARK;
-    ImVec4 bg_colour;
+    UIStyle style;
+
+    AUI *ascii_engine = nullptr;
+    char *image_path = nullptr;
+    char *output_path = nullptr;
 
     unsigned int resolution = 0;
     float aspect_ratio = 0.0;
@@ -109,6 +128,7 @@ private:
     ImFontAtlas *font_atlas = nullptr;
     ImFontConfig *font_config = nullptr;
     bool font_loaded = false;
+    char *custom_font_path = nullptr;
     
     Default default_val;
     
@@ -119,18 +139,8 @@ private:
     Notifications notifications;
   };
   
-  char *glsl_version = nullptr;
-
-  char *aui_path = nullptr;
-  AUI *aui = nullptr;
-
-  char *output_path = nullptr;
-
-  char *custom_font_path = nullptr;
-
+  std::string glsl_version;
   UI ui;
-
-  
 
   void set_window_icon();
   void process_input();
@@ -151,6 +161,9 @@ private:
   void load_custom_ascii_fonts();
   void load_fonts();
   void export_img();
+
+  void push_styles();
+  void pop_styles();
 
   void clean_gui_mem();
   

@@ -30,25 +30,21 @@ GUI :: GUI() {
   ui.window_h = display_h * .8f;
 
   ui.window_style = DARK;
-  ui.window_title = strdup("AsciiWaifu");
-  
-  ui.bg_colour = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
+  ui.window_title = "AsciiWaifu";
 
-  aui_path = strdup("input/path.image");
-
-  custom_font_path = strdup("custom/font.ttf");
+  ui.image_path = strdup("input/path.image");
+  ui.output_path = strdup("dest/path.image");
 
   ui.ascii_set = strdup("#");
   ui.ascii_scale = ui.default_val.ascii_scale;
   ui.aspect_ratio = ui.default_val.aspect_ratio;
   ui.ascii_font.size_slider = ui.font_pixels.sizes[ui.default_val.font_set_index];
   ui.tool_window_size = 260;
-
-  output_path = strdup("dest/path.image");
+  ui.custom_font_path = strdup("custom/font.ttf");
 
   // GLFW
   GLFWmonitor *primary_monitor = glfwGetPrimaryMonitor();
-  ui.window = glfwCreateWindow(ui.window_w, ui.window_h, ui.window_title, nullptr, nullptr);
+  ui.window = glfwCreateWindow(ui.window_w, ui.window_h, ui.window_title.c_str(), nullptr, nullptr);
   if (ui.window == nullptr) {
     glfw_error_callback(1, "Failed to Create GLFW Window");
   }
@@ -77,13 +73,13 @@ GUI :: GUI() {
 
   // Setup ui.Platform/Renderer backends
   ImGui_ImplGlfw_InitForOpenGL(ui.window, true);
-  ImGui_ImplOpenGL3_Init(glsl_version);
+  ImGui_ImplOpenGL3_Init(glsl_version.c_str());
 }
 
 GUI :: ~GUI() {
   printf("Terminating GUI\n");
   // Clean up
-  delete(aui);
+  delete(ui.ascii_engine);
 
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplGlfw_Shutdown();
@@ -136,11 +132,8 @@ void GUI :: run() {
 
   load_fonts();
 
-  // State
-  ImVec4 clear_color = ui.bg_colour;
-
   // Initiate AUI
-  aui = new AUI();
+  ui.ascii_engine = new AUI();
 
   //aui->load_base_image(aui_path);
   //aui->createVertexBuffer(ui.resolution, ui.aspect_ratio);
@@ -178,7 +171,7 @@ void GUI :: run() {
     
     glfwGetFramebufferSize(ui.window, &ui.window_w, &ui.window_h);
     glViewport(0, 0, ui.window_w, ui.window_h);
-    glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+    glClearColor(ui.style.col_background.x, ui.style.col_background.y, ui.style.col_background.z, ui.style.col_background.w);
     glClear(GL_COLOR_BUFFER_BIT);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -195,7 +188,7 @@ void GUI :: process_input() {
 
   if (ui.widgets.button_load_base_image) {
     pend_update_buffer = true;
-    bool load = aui->load_base_image(aui_path);
+    bool load = ui.ascii_engine->load_base_image(ui.image_path);
     if (load) {
       ui.notifications.pool.push_back("Image Loaded!");
     } else {
@@ -211,11 +204,13 @@ void GUI :: process_input() {
   if (ui.widgets.button_reset_scale) {
     pend_update_buffer = true;
     ui.ascii_scale = ui.default_val.ascii_scale;
+    ui.notifications.pool.push_back("Scale has been Reset");
   }
 
   if (ui.widgets.button_reset_aspect_ratio) {
     pend_update_buffer = true;
     ui.aspect_ratio = ui.default_val.aspect_ratio;
+    ui.notifications.pool.push_back("Aspect Ratio has been Reset");
   }
 
   if (ui.widgets.slider_font_size) {
@@ -228,6 +223,7 @@ void GUI :: process_input() {
     pend_update_buffer = true;
     ui.ascii_font.size_slider = ui.font_pixels.sizes[ui.default_val.font_set_index];
     update_font_size();
+    ui.notifications.pool.push_back("Font Size has been Reset");
   }
 
   if (ui.widgets.input_ascii_char) {
@@ -244,9 +240,9 @@ void GUI :: process_input() {
   
   // GUI update should be placed above
   if (pend_update_buffer) {
-    if (aui->is_base_img_loaded()) {
+    if (ui.ascii_engine->is_base_img_loaded()) {
       update_resolution();
-      aui->createVertexBuffer(ui.resolution, ui.aspect_ratio);
+      ui.ascii_engine->createVertexBuffer(ui.resolution, ui.aspect_ratio);
     }
   }
 
@@ -283,7 +279,8 @@ void GUI :: tool_window() {
 
   ImGui::SetNextWindowPos(tool_pos);
   ImGui::SetNextWindowSize(tool_size);
-  ImGui::SetNextWindowBgAlpha(0.8);
+  //ImGui::SetNextWindowBgAlpha(0.8);
+  push_styles();
   ImGui::PushFont(ui.window_font.font);
   ImGui::Begin("Tools", NULL, flags);
   
@@ -298,9 +295,10 @@ void GUI :: tool_window() {
   ui.notifications.size = ImVec2(tool_size.x - 2 * ui.notifications.padding, (1 - ui.widgets.ratio) * tool_size.y - 2 * ui.notifications.padding);
   draw_notifications();
   // ui.notifications End
-  
+
   ImGui::End();
   ImGui::PopFont();
+  pop_styles();
 }
 
 void GUI :: draw_widgets() {
@@ -308,10 +306,10 @@ void GUI :: draw_widgets() {
   ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoResize|ImGuiWindowFlags_NoMove|ImGuiWindowFlags_NoSavedSettings;
   ImGui::SetNextWindowPos(ui.widgets.pos);
   ImGui::SetNextWindowSize(ui.widgets.size);
-  ImGui::SetNextWindowBgAlpha(0);
+  ImGui::SetNextWindowBgAlpha(ui.style.alpha_tool_background);
   ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0); // no border
   ImGui::Begin("ui.Widgets", NULL, flags);
-  ui.widgets.button_load_base_image = gui_path_load_button(*this, "Image Path", &aui_path);
+  ui.widgets.button_load_base_image = gui_path_load_button(*this, "Image Path", &ui.image_path);
   
   ui.widgets.slider_scale = gui_slider_float(*this, "Scale", &ui.ascii_scale, 0.10, 3.00);
   ui.widgets.button_reset_scale = gui_reset_button_sameline(*this, "Scale");
@@ -324,9 +322,9 @@ void GUI :: draw_widgets() {
 
   ui.widgets.input_ascii_char = gui_text_input(*this, "Ascii Set", &ui.ascii_set);
   
-  ui.widgets.button_load_custom_font = gui_path_load_button(*this, "Custom Font Path", &custom_font_path);
+  ui.widgets.button_load_custom_font = gui_path_load_button(*this, "Custom Font Path", &ui.custom_font_path);
 
-  ui.widgets.button_export_img = gui_export_img_button(*this, "Export Window as Image", &output_path);
+  ui.widgets.button_export_img = gui_export_img_button(*this, "Export Window as Image", &ui.output_path);
   ImGui::PopStyleVar();
   ImGui::End();
 }
@@ -336,7 +334,7 @@ void GUI :: draw_notifications() {
   ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoResize|ImGuiWindowFlags_NoMove|ImGuiWindowFlags_NoSavedSettings;
   ImGui::SetNextWindowPos(ui.notifications.pos);
   ImGui::SetNextWindowSize(ui.notifications.size);
-  ImGui::SetNextWindowBgAlpha(0.0);
+  ImGui::SetNextWindowBgAlpha(ui.style.alpha_tool_background);
   ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 1.0f);
   ImGui::Begin("ui.notifications", NULL, flags);
   for (auto &note : ui.notifications.pool) {
@@ -352,11 +350,11 @@ void GUI :: draw_notifications() {
 
 
 void GUI :: draw_ascii() {
-  if (!aui->is_base_img_loaded()) {
+  if (!ui.ascii_engine->is_base_img_loaded()) {
     return;
   }
   ascii_data_t data;
-  aui->getAsciiBuffer(&data, ui.ascii_set, (unsigned int)strlen(ui.ascii_set));
+  ui.ascii_engine->getAsciiBuffer(&data, ui.ascii_set, (unsigned int)strlen(ui.ascii_set));
 
   ImGui::PushFont(ui.ascii_font.font);
   ImVec2 tex_size = ImGui::CalcTextSize("O");
@@ -464,7 +462,7 @@ void GUI :: load_ascii_fonts() {
 void GUI :: load_custom_ascii_fonts() {
   unsigned int i = 0;
   for (auto size : ui.font_pixels.sizes) {
-    ImFont *new_ascii_font = ui.font_atlas->AddFontFromFileTTF(custom_font_path, size, ui.font_config, ui.font_atlas->GetGlyphRangesDefault());
+    ImFont *new_ascii_font = ui.font_atlas->AddFontFromFileTTF(ui.custom_font_path, size, ui.font_config, ui.font_atlas->GetGlyphRangesDefault());
     new_ascii_font->FontSize = size;
     ui.font_pixels.fonts.push_back(new_ascii_font);
     i++;
@@ -487,7 +485,7 @@ void GUI :: load_fonts() {
     ui.font_loaded = true;
   } else {
     // custom fonts
-    if (is_file_ttf(custom_font_path)) {
+    if (is_file_ttf(ui.custom_font_path)) {
       ui.font_pixels.fonts.clear();
       ui.font_atlas->Clear();
       load_window_font();
@@ -506,7 +504,7 @@ void GUI :: load_fonts() {
 }
 
 void GUI :: export_img() {
-  if (!aui->is_base_img_loaded()) {
+  if (!ui.ascii_engine->is_base_img_loaded()) {
     // Base Image Not Loaded
     fprintf(stderr, "Base Image is Not Loaded\n");
     ui.notifications.pool.push_back("No Image to Export");
@@ -540,7 +538,7 @@ void GUI :: export_img() {
 
   glReadPixels(ui.boundary.x_min, ui.window_h - ui.boundary.y_max, image_size_w, image_size_h, GL_RGBA, GL_UNSIGNED_INT, buffer);
   
-  if (!export_buffer_to_img(image_size_w, image_size_h, channels, buffer, output_path)) {
+  if (!export_buffer_to_img(image_size_w, image_size_h, channels, buffer, ui.output_path)) {
     fprintf(stderr, "Failed to Export\n");
     ui.notifications.pool.push_back("Failed to Export");
     return;
@@ -548,15 +546,40 @@ void GUI :: export_img() {
   ui.notifications.pool.push_back("Image Exported!");
 }
 
+void GUI :: push_styles() {
+  ImGui::PushStyleColor(ImGuiCol_WindowBg, ui.style.col_background);
+
+  ImGui::PushStyleColor(ImGuiCol_Button, ui.style.col_widget);
+  ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ui.style.col_widget_hover);
+  ImGui::PushStyleColor(ImGuiCol_ButtonActive, ui.style.col_widget_active);
+  
+  ImGui::PushStyleColor(ImGuiCol_FrameBg, ui.style.col_widget);
+  ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ui.style.col_widget_hover);
+  ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ui.style.col_widget_hover);
+  
+  ImGui::PushStyleColor(ImGuiCol_SliderGrab, ui.style.col_slider);
+  ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, ui.style.col_slider);
+}
+
+void GUI :: pop_styles() {
+  ImGui::PopStyleColor();
+  ImGui::PopStyleColor();
+  ImGui::PopStyleColor();
+  ImGui::PopStyleColor();
+  ImGui::PopStyleColor();
+  ImGui::PopStyleColor();
+  ImGui::PopStyleColor();
+  ImGui::PopStyleColor();
+  ImGui::PopStyleColor();
+}
+
 void GUI :: clean_gui_mem() {
   // ui
   free(ui.ascii_set);
 
   // gui stuff
-  free(custom_font_path);
-  free(output_path);
-  free(ui.window_title);
-  free(glsl_version);
+  free(ui.custom_font_path);
+  free(ui.output_path);
 
   // font pixels stuff
   ui.font_pixels.fonts.clear();
