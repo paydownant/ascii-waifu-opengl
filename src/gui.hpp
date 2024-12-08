@@ -72,6 +72,10 @@ private:
   };
 
   struct Widgets {
+    ImVec2 pos;
+    ImVec2 size;
+    int padding = 0;
+    float ratio = 0.6;
     bool button_load_base_image = false;
     bool slider_scale = false;
     bool button_reset_scale = false;
@@ -82,8 +86,15 @@ private:
     bool input_ascii_char = false;
     bool button_load_custom_font = false;
     bool button_export_img = false;
-
     bool shape_bounds = false;
+  };
+
+  struct Notifications {
+    ImVec2 pos;
+    ImVec2 size;
+    int padding = 5;
+    int max_visible = 10;
+    std::vector<std::string> pool;
   };
 
   struct FontPixels {
@@ -109,6 +120,7 @@ private:
 
   DrawProperties draw_properties;
   Widgets widgets;
+  Notifications notifications;
   FontPixels font_pixels;
 
   ImFontAtlas *font_atlas = nullptr;
@@ -119,9 +131,12 @@ private:
 
   void ascii_window();
   void tool_window();
-  void bounds_window();
 
+  void draw_widgets();
+  void draw_notifications();
   void draw_ascii();
+  void draw_bounds();
+
   void update_resolution();
   void update_font_size();
 
@@ -129,7 +144,6 @@ private:
   void load_ascii_fonts();
   void load_custom_ascii_fonts();
   void load_fonts();
-  void refresh_fonts();
   void export_img();
 
   void clean_gui_mem();

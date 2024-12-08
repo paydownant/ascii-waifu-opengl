@@ -29,23 +29,22 @@ GUI :: GUI() {
   window_w = display_w * .8f;
   window_h = display_h * .8f;
 
-  window_title = strdup("AsciiWaifu");
   window_style = DARK;
-
+  window_title = strdup("AsciiWaifu");
+  
   bg_colour = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
 
   aui_path = strdup("input/path.image");
 
   custom_font_path = strdup("custom/font.ttf");
 
-  draw_properties.ascii_set = strdup("O");
+  draw_properties.ascii_set = strdup("#");
   draw_properties.ascii_scale = draw_properties.default_val.ascii_scale;
   draw_properties.aspect_ratio = draw_properties.default_val.aspect_ratio;
   draw_properties.ascii_font.size_slider = font_pixels.sizes[draw_properties.default_val.font_set_index];
   draw_properties.tool_window_size = 260;
 
   output_path = strdup("dest/path.image");
-
 
   // GLFW
   GLFWmonitor *primary_monitor = glfwGetPrimaryMonitor();
@@ -168,8 +167,6 @@ void GUI :: run() {
     
     tool_window();
 
-    bounds_window();
-
     // Body End
 
     // Rendering
@@ -197,7 +194,12 @@ void GUI :: process_input() {
 
   if (widgets.button_load_base_image) {
     pend_update_buffer = true;
-    aui->load_base_image(aui_path);
+    bool load = aui->load_base_image(aui_path);
+    if (load) {
+      notifications.pool.push_back("Image Loaded!");
+    } else {
+      notifications.pool.push_back("Failed to Load Base Image");
+    }
   }
 
   if (widgets.slider_scale || widgets.slider_aspect_ratio) {
@@ -257,27 +259,57 @@ void GUI :: ascii_window() {
   ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoTitleBar  |
   ImGuiWindowFlags_NoScrollbar        | ImGuiWindowFlags_NoDecoration          | ImGuiWindowFlags_NoResize    |
   ImGuiWindowFlags_NoMove             | ImGuiWindowFlags_NoSavedSettings       | ImGuiWindowFlags_NoNav;
-  ImGui::SetNextWindowSize(ImVec2((float)window_w, (float)window_h));
   ImGui::SetNextWindowPos(ImVec2(0, 0));
+  ImGui::SetNextWindowSize(ImVec2((float)window_w, (float)window_h));
   ImGui::SetNextWindowBgAlpha(0.0);
-
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 1.0f);
   ImGui::Begin("Render", NULL, flags);
 
   draw_ascii();
-    
+  draw_bounds();
+
+  ImGui::PopStyleVar();
   ImGui::End();
 }
 
 void GUI :: tool_window() {
-  ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings;
+  ImGuiWindowFlags flags = 
+  ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoTitleBar  |
+  ImGuiWindowFlags_NoScrollbar        | ImGuiWindowFlags_NoDecoration          | ImGuiWindowFlags_NoResize    |
+  ImGuiWindowFlags_NoMove             | ImGuiWindowFlags_NoSavedSettings       | ImGuiWindowFlags_NoNav;
+  ImVec2 tool_pos = ImVec2(window_w - draw_properties.tool_window_size, 0);
+  ImVec2 tool_size = ImVec2(draw_properties.tool_window_size, window_h);
 
-  ImGui::SetNextWindowPos(ImVec2(window_w - draw_properties.tool_window_size, 0));
-  ImGui::SetNextWindowSize(ImVec2(draw_properties.tool_window_size, window_h));
+  ImGui::SetNextWindowPos(tool_pos);
+  ImGui::SetNextWindowSize(tool_size);
   ImGui::SetNextWindowBgAlpha(0.8);
-
   ImGui::PushFont(draw_properties.window_font.font);
   ImGui::Begin("Tools", NULL, flags);
   
+  // Widgets
+  widgets.pos = ImVec2(tool_pos.x + widgets.padding, tool_pos.y + widgets.padding);
+  widgets.size = ImVec2(tool_size.x - 2 * widgets.padding, widgets.ratio * tool_size.y - 2 * widgets.padding);
+  draw_widgets();
+  // Widgets End
+
+  // notifications
+  notifications.pos = ImVec2(tool_pos.x + notifications.padding, tool_pos.y + widgets.pos.y + widgets.size.y + notifications.padding);
+  notifications.size = ImVec2(tool_size.x - 2 * notifications.padding, (1 - widgets.ratio) * tool_size.y - 2 * notifications.padding);
+  draw_notifications();
+  // notifications End
+  
+  ImGui::End();
+  ImGui::PopFont();
+}
+
+void GUI :: draw_widgets() {
+  ImGuiWindowFlags flags =
+  ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoResize|ImGuiWindowFlags_NoMove|ImGuiWindowFlags_NoSavedSettings;
+  ImGui::SetNextWindowPos(widgets.pos);
+  ImGui::SetNextWindowSize(widgets.size);
+  ImGui::SetNextWindowBgAlpha(0);
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0); // no border
+  ImGui::Begin("Widgets", NULL, flags);
   widgets.button_load_base_image = gui_path_load_button(*this, "Image Path", &aui_path);
   
   widgets.slider_scale = gui_slider_float(*this, "Scale", &draw_properties.ascii_scale, 0.10, 3.00);
@@ -294,16 +326,81 @@ void GUI :: tool_window() {
   widgets.button_load_custom_font = gui_path_load_button(*this, "Custom Font Path", &custom_font_path);
 
   widgets.button_export_img = gui_export_img_button(*this, "Export Window as Image", &output_path);
-
+  ImGui::PopStyleVar();
   ImGui::End();
-  ImGui::PopFont();
 }
 
-void GUI :: bounds_window() {
+void GUI :: draw_notifications() {
+  ImGuiWindowFlags flags =
+  ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoResize|ImGuiWindowFlags_NoMove|ImGuiWindowFlags_NoSavedSettings;
+  ImGui::SetNextWindowPos(notifications.pos);
+  ImGui::SetNextWindowSize(notifications.size);
+  ImGui::SetNextWindowBgAlpha(0.8);
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 1.0f);
+  ImGui::Begin("notifications", NULL, flags);
+  for (auto &note : notifications.pool) {
+    ImGui::Text(note.c_str());
+  }
+  if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY()) {
+    // Scroll to the Bottom
+    ImGui::SetScrollHereY(1.0f);
+  }
+  ImGui::PopStyleVar();
+  ImGui::End();
+}
+
+
+void GUI :: draw_ascii() {
+  if (!aui->is_base_img_loaded()) {
+    return;
+  }
+  ascii_data_t data;
+  aui->getAsciiBuffer(&data, draw_properties.ascii_set, (unsigned int)strlen(draw_properties.ascii_set));
+
+  ImGui::PushFont(draw_properties.ascii_font.font);
+  ImVec2 tex_size = ImGui::CalcTextSize("O");
+  float font_w = tex_size.x, font_h = tex_size.y;
+  for (unsigned int y = 0; y < data.height; ++y) {
+    for (unsigned int x = 0; x < data.width; ++x) {
+      float r_level, g_level, b_level;
+      r_level = data.colour_strip[y * data.width + x].x;
+      g_level = data.colour_strip[y * data.width + x].y;
+      b_level = data.colour_strip[y * data.width + x].z;
+      
+      ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(r_level, g_level, b_level, 1.0f));
+      ImGui::SetCursorPosX(font_w * x);
+      ImGui::SetCursorPosY(font_h * y);
+      ImGui::Text("%c", data.char_strip[y * data.width + x]);
+      ImGui::PopStyleColor();
+
+      ImGui::SameLine(0.0f, 0.0f);
+    }
+    ImGui::NewLine();
+  }
+  ImGui::PopFont();
+  free(data.char_strip);
+  free(data.colour_strip);
+  
+  // Calculating Drawing Boundary
+  draw_properties.boundary.x_min = 0;
+  draw_properties.boundary.y_min = 0;
+  draw_properties.boundary.x_max = (strlen(draw_properties.ascii_set) > 0) * font_w * data.width + draw_properties.boundary.x_min;
+  draw_properties.boundary.y_max = (strlen(draw_properties.ascii_set) > 0) * font_h * data.height + draw_properties.boundary.y_min;
+  
+  unsigned int drawable_max_x = window_w - draw_properties.tool_window_size;
+  unsigned int drawable_max_y = window_h;
+  // Check for Out of Bounds
+  if (draw_properties.boundary.x_max > drawable_max_x || draw_properties.boundary.y_max > drawable_max_y) {
+    widgets.shape_bounds = true;
+  } else {
+    widgets.shape_bounds = false;
+  }
+}
+
+void GUI :: draw_bounds() {
   if (!widgets.shape_bounds) {
     return;
   }
-
   ImGuiWindowFlags flags = 
   ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoTitleBar      |
   ImGuiWindowFlags_NoResize           | ImGuiWindowFlags_NoMove                | ImGuiWindowFlags_NoSavedSettings | 
@@ -324,65 +421,11 @@ void GUI :: bounds_window() {
 
   ImGui::PopStyleVar();
   ImGui::PopStyleColor();
-
-}
-
-void GUI :: draw_ascii() {
-  if (!aui->is_base_img_loaded()) {
-    return;
-  }
-
-  ascii_data_t data;
-  
-  aui->getAsciiBuffer(&data, draw_properties.ascii_set, (unsigned int)strlen(draw_properties.ascii_set));
-
-  ImGui::PushFont(draw_properties.ascii_font.font);
-  ImVec2 tex_size = ImGui::CalcTextSize("O");
-  float font_w = tex_size.x, font_h = tex_size.y;
-  for (unsigned int y = 0; y < data.height; ++y) {
-    for (unsigned int x = 0; x < data.width; ++x) {
-      float r_level, g_level, b_level;
-      r_level = data.colour_strip[y * data.width + x].x;
-      g_level = data.colour_strip[y * data.width + x].y;
-      b_level = data.colour_strip[y * data.width + x].z;
-      
-      ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(r_level, g_level, b_level, 1.0f));
-      
-      ImGui::SetCursorPosX(font_w * x);
-      ImGui::SetCursorPosY(font_h * y);
-      ImGui::Text("%c", data.char_strip[y * data.width + x]);
-      
-      ImGui::PopStyleColor();
-
-      ImGui::SameLine(0.0f, 0.0f);
-    }
-    ImGui::NewLine();
-  }
-  ImGui::PopFont();
-  free(data.char_strip);
-  free(data.colour_strip);
-  
-  // Calculating Drawing Boundary
-  draw_properties.boundary.x_min = 0;
-  draw_properties.boundary.y_min = 0;
-
-  draw_properties.boundary.x_max = font_w * data.width + draw_properties.boundary.x_min;
-  draw_properties.boundary.y_max = font_h * data.height + draw_properties.boundary.y_min;
-  
-  unsigned int drawable_max_x = window_w - draw_properties.tool_window_size;
-  unsigned int drawable_max_y = window_h;
-  // Check for Out of Bounds
-  if (draw_properties.boundary.x_max > drawable_max_x || draw_properties.boundary.y_max > drawable_max_y) {
-    widgets.shape_bounds = true;
-  } else {
-    widgets.shape_bounds = false;
-  }
 }
 
 void GUI :: update_resolution() {
   draw_properties.resolution = 1.66f * draw_properties.ascii_scale
    * (window_w / draw_properties.ascii_font.size + ((window_w / draw_properties.ascii_font.size) * (.5f - draw_properties.aspect_ratio)));
-
 }
 
 void GUI :: update_font_size() {
@@ -396,7 +439,6 @@ void GUI :: update_font_size() {
     fp++;
   }
   draw_properties.ascii_font.size_slider = draw_properties.ascii_font.size;
-  
 }
 
 void GUI :: load_window_font() {
@@ -406,7 +448,7 @@ void GUI :: load_window_font() {
 void GUI :: load_ascii_fonts() {
   unsigned int i = 0;
   for (auto size : font_pixels.sizes) {
-    ImFont *new_ascii_font = font_atlas->AddFontFromMemoryCompressedTTF(unifont_compressed_data, unifont_compressed_size, size, font_config, font_atlas->GetGlyphRangesDefault());
+    ImFont *new_ascii_font = font_atlas->AddFontFromMemoryCompressedTTF(pixelify_compressed_data, pixelify_compressed_size, size, font_config, font_atlas->GetGlyphRangesDefault());
     new_ascii_font->FontSize = size;
     font_pixels.fonts.push_back(new_ascii_font);
     i++;
@@ -443,13 +485,16 @@ void GUI :: load_fonts() {
     draw_properties.ascii_font.size_slider = font_pixels.sizes[draw_properties.default_val.font_set_index];
     draw_properties.font_loaded = true;
   } else {
+    // custom fonts
     if (is_file_ttf(custom_font_path)) {
       font_pixels.fonts.clear();
       font_atlas->Clear();
       load_window_font();
       load_custom_ascii_fonts();
+      notifications.pool.push_back("Fonts Loaded!");
     } else {
       fprintf(stderr, "File Format Specified is Not TTF\n");
+      notifications.pool.push_back("Fonts Must be TTF");
       return;
     }
   }
@@ -463,12 +508,21 @@ void GUI :: export_img() {
   if (!aui->is_base_img_loaded()) {
     // Base Image Not Loaded
     fprintf(stderr, "Base Image is Not Loaded\n");
+    notifications.pool.push_back("No Image to Export");
+    return;
+  }
+
+  if (!draw_properties.boundary.x_max && !draw_properties.boundary.y_max) {
+    // No Ascii Image to Export
+    fprintf(stderr, "Ascii Image Not Rendered\n");
+    notifications.pool.push_back("No Image to Export");
     return;
   }
 
   if (widgets.shape_bounds) {
     // Out of Bounds
     fprintf(stderr, "Ascii Image is Out of Bounds\n");
+    notifications.pool.push_back("Resize the Image to Fit");
     return;
   }
 
@@ -479,6 +533,7 @@ void GUI :: export_img() {
   unsigned int *buffer = new unsigned int[image_size_w * image_size_h * channels];
   if (buffer == nullptr) {
     fprintf(stderr, "Failed to Create Export Buffer\n");
+    notifications.pool.push_back("Failed to Export");
     return;
   }
 
@@ -486,7 +541,10 @@ void GUI :: export_img() {
   
   if (!export_buffer_to_img(image_size_w, image_size_h, channels, buffer, output_path)) {
     fprintf(stderr, "Failed to Export\n");
+    notifications.pool.push_back("Failed to Export");
+    return;
   }
+  notifications.pool.push_back("Image Exported!");
 }
 
 void GUI :: clean_gui_mem() {
