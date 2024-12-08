@@ -58,19 +58,6 @@ private:
     unsigned int y_max = 0;
   };
 
-  struct DrawProperties {
-    unsigned int resolution = 0;
-    float aspect_ratio = 0.0;
-    float ascii_scale = 0.0;
-    WindowFont window_font;
-    auchar *ascii_set = nullptr;
-    AsciiFont ascii_font;
-    bool font_loaded = false;
-    Default default_val;
-    DrawBoundary boundary;
-    int tool_window_size = 0;
-  };
-
   struct Widgets {
     ImVec2 pos;
     ImVec2 size;
@@ -101,15 +88,38 @@ private:
     std::vector<ImFont *> fonts;
     std::vector<int> sizes = {6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40};
   };
+
+  struct UI {
+    int platform = 0;
+    int window_w = 0, window_h = 0;
+    GLFWwindow* window = nullptr;
+    char *window_title = nullptr;
+    int window_style = DARK;
+    ImVec4 bg_colour;
+
+    unsigned int resolution = 0;
+    float aspect_ratio = 0.0;
+    float ascii_scale = 0.0;
+
+    WindowFont window_font;
+    auchar *ascii_set = nullptr;
+    AsciiFont ascii_font;
+
+    FontPixels font_pixels;
+    ImFontAtlas *font_atlas = nullptr;
+    ImFontConfig *font_config = nullptr;
+    bool font_loaded = false;
+    
+    Default default_val;
+    
+    DrawBoundary boundary;
+    
+    int tool_window_size = 0;
+    Widgets widgets;
+    Notifications notifications;
+  };
   
   char *glsl_version = nullptr;
-  int platform = 0;
-  int window_w = 0, window_h = 0;
-  GLFWwindow* window = nullptr;
-  char *window_title = nullptr;
-  int window_style = DARK;
-
-  ImVec4 bg_colour;
 
   char *aui_path = nullptr;
   AUI *aui = nullptr;
@@ -118,13 +128,9 @@ private:
 
   char *custom_font_path = nullptr;
 
-  DrawProperties draw_properties;
-  Widgets widgets;
-  Notifications notifications;
-  FontPixels font_pixels;
+  UI ui;
 
-  ImFontAtlas *font_atlas = nullptr;
-  ImFontConfig *font_config = nullptr;
+  
 
   void set_window_icon();
   void process_input();
