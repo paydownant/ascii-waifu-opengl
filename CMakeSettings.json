@@ -2,9 +2,9 @@
   "configurations": [
     {
       "name": "x64-Debug",
-      "generator": "Visual Studio 17 2022",
+      "generator": "Visual Studio 17 2022 Win64",
       "configurationType": "Debug",
-      "inheritEnvironments": [ "msvc_x86" ],
+      "inheritEnvironments": [ "msvc_x64" ],
       "buildRoot": "${projectDir}\\out\\build\\${name}",
       "installRoot": "${projectDir}\\out\\install\\${name}",
       "cmakeCommandArgs": "",
@@ -13,7 +13,7 @@
       "variables": [
         {
           "name": "CMAKE_TOOLCHAIN_FILE",
-          "value": "C:\\Program Files\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake",
+          "value": "C:\\Users\\takas\\Documents\\Dev\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake",
           "type": "STRING"
         }
       ]
@@ -31,7 +31,7 @@
       "variables": [
         {
           "name": "CMAKE_TOOLCHAIN_FILE",
-          "value": "C:\\Program Files\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake",
+          "value": "C:\\Users\\takas\\Documents\\Dev\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake",
           "type": "STRING"
         }
       ]
