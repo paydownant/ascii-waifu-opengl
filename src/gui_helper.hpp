@@ -6,6 +6,7 @@
 #include <cstring>
 #include <ctype.h>
 #include <stdexcept>
+#include <algorithm> 
 
 #include "imagesource.hpp"
 
