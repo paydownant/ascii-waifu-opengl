@@ -29,150 +29,150 @@ class GUI {
 
 private:
 
-  enum WindowStyle {
-    DARK,
-    LIGHT
-  };
+    enum WindowStyle {
+        DARK,
+        LIGHT
+    };
 
-  struct WindowFont {
-    ImFont *font = nullptr;
-    int size = 24;
-  };
+    struct WindowFont {
+        ImFont* font = nullptr;
+        int size = 24;
+    };
 
-  struct AsciiFont {
-    ImFont *font = nullptr;
-    int size = 20;
-    int size_slider = 0;
-  };
+    struct AsciiFont {
+        ImFont* font = nullptr;
+        int size = 20;
+        int size_slider = 0;
+    };
 
-  struct Default {
-    const float ascii_scale = 1.0f;
-    const float aspect_ratio = 0.5f;
-    const int font_set_index = 7;
-  };
+    struct Default {
+        const float ascii_scale = 1.0f;
+        const float aspect_ratio = 0.5f;
+        const int font_set_index = 7;
+    };
 
-  struct DrawBoundary {
-    unsigned int x_min = 0;
-    unsigned int x_max = 0;
-    unsigned int y_min = 0;
-    unsigned int y_max = 0;
-  };
+    struct DrawBoundary {
+        unsigned int x_min = 0;
+        unsigned int x_max = 0;
+        unsigned int y_min = 0;
+        unsigned int y_max = 0;
+    };
 
-  struct Widgets {
-    ImVec2 pos;
-    ImVec2 size;
-    int padding = 1;
-    float ratio = 0.6;
-    bool button_load_base_image = false;
-    bool slider_scale = false;
-    bool button_reset_scale = false;
-    bool slider_aspect_ratio = false;
-    bool button_reset_aspect_ratio = false;
-    bool slider_font_size = false;
-    bool button_reset_font_size = false;
-    bool input_ascii_char = false;
-    bool button_load_custom_font = false;
-    bool button_export_img = false;
-    bool shape_bounds = false;
-  };
+    struct Widgets {
+        ImVec2 pos;
+        ImVec2 size;
+        int padding = 1;
+        float ratio = 0.6;
+        bool button_load_base_image = false;
+        bool slider_scale = false;
+        bool button_reset_scale = false;
+        bool slider_aspect_ratio = false;
+        bool button_reset_aspect_ratio = false;
+        bool slider_font_size = false;
+        bool button_reset_font_size = false;
+        bool input_ascii_char = false;
+        bool button_load_custom_font = false;
+        bool button_export_img = false;
+        bool shape_bounds = false;
+    };
 
-  struct Notifications {
-    ImVec2 pos;
-    ImVec2 size;
-    int padding = 5;
-    int max_visible = 10;
-    std::vector<std::string> pool;
-  };
+    struct Notifications {
+        ImVec2 pos;
+        ImVec2 size;
+        int padding = 5;
+        int max_visible = 10;
+        std::vector<std::string> pool;
+    };
 
-  struct FontPixels {
-    std::vector<ImFont *> fonts;
-    std::vector<int> sizes = {6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40};
-  };
+    struct FontPixels {
+        std::vector<ImFont*> fonts;
+        std::vector<int> sizes = { 6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40 };
+    };
 
-  struct UIStyle {
-    ImVec4 col_background = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
-    
-    float alpha_tool_background = 0.65f;
+    struct UIStyle {
+        ImVec4 col_background = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
 
-    ImVec4 col_border = ImVec4(0.3f, 0.3f, 0.3f, 1.0f);
+        float alpha_tool_background = 0.65f;
 
-    ImVec4 col_widget = ImVec4(0.15f, 0.15f, 0.15f, 1.0f);
-    ImVec4 col_widget_hover = ImVec4(0.2f, 0.2f, 0.2f, 1.0f);
-    ImVec4 col_widget_active = ImVec4(0.25f, 0.25f, 0.25f, 1.0f);
-    
-    ImVec4 col_slider = ImVec4(0.35f, 0.35f, 0.35f, 1.0f);
-    ImVec4 col_slider_active = ImVec4(0.6f, 0.0f, 0.0f, 1.0f);
-  };
+        ImVec4 col_border = ImVec4(0.3f, 0.3f, 0.3f, 1.0f);
 
-  struct UI {
-    int platform = 0;
-    int window_w = 0, window_h = 0;
-    GLFWwindow* window = nullptr;
-    std::string window_title;
-    int window_style = DARK;
-    UIStyle style;
+        ImVec4 col_widget = ImVec4(0.15f, 0.15f, 0.15f, 1.0f);
+        ImVec4 col_widget_hover = ImVec4(0.2f, 0.2f, 0.2f, 1.0f);
+        ImVec4 col_widget_active = ImVec4(0.25f, 0.25f, 0.25f, 1.0f);
 
-    AUI *ascii_engine = nullptr;
-    char *image_path = nullptr;
-    char *output_path = nullptr;
+        ImVec4 col_slider = ImVec4(0.35f, 0.35f, 0.35f, 1.0f);
+        ImVec4 col_slider_active = ImVec4(0.6f, 0.0f, 0.0f, 1.0f);
+    };
 
-    unsigned int resolution = 0;
-    float aspect_ratio = 0.0;
-    float ascii_scale = 0.0;
+    struct UI {
+        int platform = 0;
+        int window_w = 0, window_h = 0;
+        GLFWwindow* window = nullptr;
+        std::string window_title;
+        int window_style = DARK;
+        UIStyle style;
 
-    WindowFont window_font;
-    auchar *ascii_set = nullptr;
-    AsciiFont ascii_font;
+        AUI* ascii_engine = nullptr;
+        char* image_path = nullptr;
+        char* output_path = nullptr;
 
-    FontPixels font_pixels;
-    ImFontAtlas *font_atlas = nullptr;
-    ImFontConfig *font_config = nullptr;
-    bool font_loaded = false;
-    char *custom_font_path = nullptr;
-    
-    Default default_val;
-    
-    DrawBoundary boundary;
-    
-    int tool_window_size = 0;
-    Widgets widgets;
-    Notifications notifications;
-  };
-  
-  std::string glsl_version;
-  UI ui;
+        unsigned int resolution = 0;
+        float aspect_ratio = 0.0;
+        float ascii_scale = 0.0;
 
-  void set_window_icon();
-  void process_input();
+        WindowFont window_font;
+        auchar* ascii_set = nullptr;
+        AsciiFont ascii_font;
 
-  void ascii_window();
-  void tool_window();
+        FontPixels font_pixels;
+        ImFontAtlas* font_atlas = nullptr;
+        ImFontConfig* font_config = nullptr;
+        bool font_loaded = false;
+        char* custom_font_path = nullptr;
 
-  void draw_widgets();
-  void draw_notifications();
-  void draw_ascii();
-  void draw_bounds();
+        Default default_val;
 
-  void update_resolution();
-  void update_font_size();
+        DrawBoundary boundary;
 
-  void load_window_font();
-  void load_ascii_fonts();
-  void load_custom_ascii_fonts();
-  void load_fonts();
-  void export_img();
+        int tool_window_size = 0;
+        Widgets widgets;
+        Notifications notifications;
+    };
 
-  void push_styles();
-  void pop_styles();
+    std::string glsl_version;
+    UI ui;
 
-  void clean_gui_mem();
-  
+    void set_window_icon();
+    void process_input();
+
+    void ascii_window();
+    void tool_window();
+
+    void draw_widgets();
+    void draw_notifications();
+    void draw_ascii();
+    void draw_bounds();
+
+    void update_resolution();
+    void update_font_size();
+
+    void load_window_font();
+    void load_ascii_fonts();
+    void load_custom_ascii_fonts();
+    void load_fonts();
+    void export_img();
+
+    void push_styles();
+    void pop_styles();
+
+    void clean_gui_mem();
+
 
 public:
-  GUI();
-  ~GUI();
+    GUI();
+    ~GUI();
 
-  void run();
+    void run();
 
 };
 
