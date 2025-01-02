@@ -187,6 +187,7 @@ void GUI::process_input() {
     bool pend_update_buffer = false;
 
     if (ui.widgets.button_load_base_image) {
+        fix_path_input(ui.image_path);
         pend_update_buffer = true;
         bool load = ui.ascii_engine->load_base_image(ui.image_path);
         if (load) {
