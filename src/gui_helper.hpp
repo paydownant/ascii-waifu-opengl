@@ -39,6 +39,19 @@ bool is_file_ttf(const char* file_path) {
     return ttf;
 }
 
+bool fix_path_input(char *filepath) {
+    std::string path_str(filepath);
+    std::ifstream fs(path_str);
+    if (fs.is_open()) {
+        // no need to modify
+        fs.close();
+        return false;
+    }
+    path_str.erase(std::remove(path_str.begin(), path_str.end(), '\"'), path_str.end());
+    strcpy(filepath, path_str.c_str());
+    return true;
+}
+
 bool export_buffer_to_img(const unsigned int width, const unsigned int height, const unsigned int channels, const unsigned int* buffer, const char* image_path) {
     if (width * height <= 0 || buffer == nullptr || image_path == nullptr) {
         return false;
