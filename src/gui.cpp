@@ -235,6 +235,7 @@ void GUI::process_input() {
 
     if (ui.widgets.button_load_custom_font) {
         // update font
+        fix_path_input(ui.custom_font_path);
         pend_update_buffer = true;
         load_fonts();
         update_font_size();
@@ -249,6 +250,7 @@ void GUI::process_input() {
     }
 
     if (ui.widgets.button_export_img) {
+        fix_path_input(ui.output_path);
         export_img();
     }
 }
